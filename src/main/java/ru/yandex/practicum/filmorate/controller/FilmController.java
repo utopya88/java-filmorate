@@ -70,10 +70,11 @@ public class FilmController {
     boolean validationFilm(Film film) throws ParseException {
         Instant now = Instant.ofEpochSecond(0);
         DateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-        Date dateOrig = sdf.parse(String.valueOf(film.getReleaseDate()));
+        Instant films = film.getReleaseDate().toInstant();
         Date dtRealese = sdf.parse("1985-12-28");
+        Instant origDate = dtRealese.toInstant();
         if (film.getName() != null && !film.getName().isEmpty() && film.getDescription().length() <= 200
-                && film.getDuration().isAfter(now) && dateOrig.after(dtRealese)) {
+                && film.getDuration().isAfter(now) && films.isAfter(origDate)) {
             return true;
         } else {
             return false;
