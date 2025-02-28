@@ -51,7 +51,7 @@ public class FilmController {
         }
         if (films.containsKey(newFilm.getId())) {
             Film oldFilm = films.get(newFilm.getId());
-            if(validationFilm(newFilm)){
+            if (validationFilm(newFilm)) {
                 oldFilm.setName(newFilm.getName());
                 oldFilm.setDuration(newFilm.getDuration());
                 oldFilm.setDescription(newFilm.getDescription());
