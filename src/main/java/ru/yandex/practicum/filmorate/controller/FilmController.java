@@ -51,7 +51,7 @@ public class FilmController {
         }
         if (films.containsKey(newFilm.getId())) {
             Film oldFilm = films.get(newFilm.getId());
-            if(validationFilm(newFilm)) {
+            if(validationFilm(newFilm)){
                 oldFilm.setName(newFilm.getName());
                 oldFilm.setDuration(newFilm.getDuration());
                 oldFilm.setDescription(newFilm.getDescription());
@@ -67,7 +67,7 @@ public class FilmController {
         }
     }
 
-    boolean validationFilm (Film film) throws ParseException {
+    boolean validationFilm(Film film) throws ParseException {
         Instant now = Instant.ofEpochSecond(0);
         DateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         Date dateOrig = sdf.parse(String.valueOf(film.getReleaseDate()));
