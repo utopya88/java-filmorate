@@ -20,7 +20,7 @@ public class UserController {
     Map<Integer, User> users = new HashMap<>();
 
     @GetMapping
-    Collection<User> findAll(){
+    Collection<User> findAll() {
         log.trace("Получены все пользователи");
         return users.values();
     }
@@ -56,7 +56,7 @@ public class UserController {
         }
         if (users.containsKey(newUser.getId())) {
             User oldUser = users.get(newUser.getId());
-            if(validationUser(newUser)) {
+            if (validationUser(newUser)) {
                 oldUser.setName(newUser.getName());
                 oldUser.setLogin(newUser.getLogin());
                 oldUser.setEmail(newUser.getEmail());
@@ -72,10 +72,10 @@ public class UserController {
         }
     }
 
-    boolean validationUser(User user) throws ParseException{
+    boolean validationUser(User user) throws ParseException {
         Instant time = Instant.now();
         Instant date = user.getBirthday().toInstant();
-        if(!user.getEmail().isBlank() && user.getEmail().contains("@") && !user.getLogin().isBlank() &&
+        if (!user.getEmail().isBlank() && user.getEmail().contains("@") && !user.getLogin().isBlank() &&
                 user.getLogin().contains(" ") && date.isAfter(time)) {
             if (user.getName().isBlank()) {
                 user.setName(user.getLogin());
