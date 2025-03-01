@@ -5,15 +5,13 @@ import org.springframework.web.bind.annotation.*;
 
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
+import static ru.yandex.practicum.filmorate.utils.ValidationController.validateFilm;
 
-import java.text.DateFormat;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.time.Instant;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+
 
 @Slf4j
 @RestController
@@ -30,13 +28,12 @@ public class FilmController {
 
     @PostMapping
     public Film create(@RequestBody Film film) throws ParseException {
-        if (validationFilm(film)) {
+        if (validateFilm(film)) {
             film.setId(getNextId());
             films.put(film.getId(),film);
             log.info("Получены следующие значения:{}, {}, {}, {}", "film.setName()", "film.setDuration()",
                     "film.setDescription()", "film.setReleaseDate()");
             return film;
-
         } else {
             log.warn("Получены следующие значения:{}, {}, {}, {}", "film.setName()", "film.setDuration()",
                     "film.setDescription()", "film.setReleaseDate()");
@@ -51,7 +48,7 @@ public class FilmController {
         }
         if (films.containsKey(newFilm.getId())) {
             Film oldFilm = films.get(newFilm.getId());
-            if (validationFilm(newFilm)) {
+            if (validateFilm(newFilm)) {
                 oldFilm.setName(newFilm.getName());
                 oldFilm.setDuration(newFilm.getDuration());
                 oldFilm.setDescription(newFilm.getDescription());
@@ -64,20 +61,6 @@ public class FilmController {
             log.warn("Получены следующие значения:{}, {}, {}, {}", "newFilm.setName()", "newFilm.setDuration()",
                     "newFilm.setDescription()", "newFilm.setReleaseDate()");
             throw new ValidationException("Ошибка валидации. Все поля на обновления должны быть заполнены");
-        }
-    }
-
-    boolean validationFilm(Film film) throws ParseException {
-        Instant now = Instant.ofEpochSecond(0);
-        DateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-        Instant films = film.getReleaseDate().toInstant();
-        Date dtRealese = sdf.parse("1985-12-28");
-        Instant origDate = dtRealese.toInstant();
-        if (film.getName() != null && !film.getName().isEmpty() && film.getDescription().length() <= 200
-                && film.getDuration().isAfter(now) && films.isAfter(origDate)) {
-            return true;
-        } else {
-            return false;
         }
     }
 

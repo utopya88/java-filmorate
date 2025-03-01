@@ -5,9 +5,10 @@ import org.springframework.web.bind.annotation.*;
 
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
+import static ru.yandex.practicum.filmorate.utils.ValidationController.validateUser;
+
 
 import java.text.ParseException;
-import java.time.Instant;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -36,7 +37,7 @@ public class UserController {
 
     @PostMapping
     public User create(@RequestBody User user) throws ParseException {
-        if (validationUser(user)) {
+        if (validateUser(user)) {
             user.setId(getNextId());
             users.put(user.getId(),user);
             log.info("Получены следующие значения:{}, {}, {}, {}", "user.getEmail()", "user.getName()",
@@ -56,7 +57,7 @@ public class UserController {
         }
         if (users.containsKey(newUser.getId())) {
             User oldUser = users.get(newUser.getId());
-            if (validationUser(newUser)) {
+            if (validateUser(newUser)) {
                 oldUser.setName(newUser.getName());
                 oldUser.setLogin(newUser.getLogin());
                 oldUser.setEmail(newUser.getEmail());
@@ -71,19 +72,4 @@ public class UserController {
             throw new ValidationException("Ошибка валидации. Все поля на обновления должны быть заполнены");
         }
     }
-
-    boolean validationUser(User user) throws ParseException {
-        Instant time = Instant.now();
-        Instant date = user.getBirthday().toInstant();
-        if (!user.getEmail().isBlank() && user.getEmail().contains("@") && !user.getLogin().isBlank() &&
-                user.getLogin().contains(" ") && date.isAfter(time)) {
-            if (user.getName().isBlank()) {
-                user.setName(user.getLogin());
-            }
-        return true;
-        } else {
-            throw new ValidationException("Ошибка валидации");
-        }
-    }
-
 }
