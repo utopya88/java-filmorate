@@ -17,7 +17,7 @@ import java.util.Map;
 @Service
 public class FilmService {
 
-    public static int filmId = 0 ;
+    public static int filmId = 0;
     public final Map<Integer, Film> films = new HashMap<>();
 
     public Collection<Film> findAll() {
