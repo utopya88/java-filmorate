@@ -3,73 +3,37 @@ package ru.yandex.practicum.filmorate.controller;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
-import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
-import static ru.yandex.practicum.filmorate.utils.ValidationController.validateUser;
+import ru.yandex.practicum.filmorate.service.UserService;
 
 
 import java.text.ParseException;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
 
 @Slf4j
 @RestController
 @RequestMapping("/users")
 public class UserController {
 
-    Map<Integer, User> users = new HashMap<>();
+    private final UserService userService;
 
-    @GetMapping
-    Collection<User> findAll() {
-        log.trace("Получены все пользователи");
-        return users.values();
+    public UserController(UserService userService) {
+        this.userService = userService;
     }
 
-    private int getNextId() {
-        int currentMaxId = users.keySet()
-                .stream()
-                .mapToInt(id -> id)
-                .max()
-                .orElse(0);
-        return ++currentMaxId;
+    @GetMapping
+    public Collection<User> findAll() {
+        return userService.findAll();
     }
 
     @PostMapping
     public User create(@RequestBody User user) throws ParseException {
-        if (validateUser(user)) {
-            user.setId(getNextId());
-            users.put(user.getId(),user);
-            log.info("Получены следующие значения:{}, {}, {}, {}", "user.getEmail()", "user.getName()",
-                    "user.getLogin()", "user.getBirthday()");
-            return user;
-        } else {
-            log.warn("Получены следующие значения:{}, {}, {}, {}", "user.getEmail()", "user.getName()",
-                    "user.getLogin()", "user.getBirthday()");
-            throw new ValidationException("Ошибка валидации фильма. Исправьте ошибку и попробуйте снова");
-        }
+        return userService.create(user);
     }
 
     @PutMapping
     public User update(@RequestBody User newUser) throws ParseException {
-        if (newUser.getId() == null) {
-            throw new ValidationException("Необходимо указать Ид фильма");
-        }
-        if (users.containsKey(newUser.getId())) {
-            User oldUser = users.get(newUser.getId());
-            if (validateUser(newUser)) {
-                oldUser.setName(newUser.getName());
-                oldUser.setLogin(newUser.getLogin());
-                oldUser.setEmail(newUser.getEmail());
-                oldUser.setBirthday(newUser.getBirthday());
-            }
-            log.info("Получены следующие значения:{}, {}, {}, {}", "newUser.getEmail()", "newUser.getName()",
-                    "newUser.getLogin()", "newUser.getBirthday()");
-            return oldUser;
-        } else {
-            log.warn("Получены следующие значения:{}, {}, {}, {}", "newUser.getEmail()", "newUser.getName()",
-                    "newUser.getLogin()", "newUser.getBirthday()");
-            throw new ValidationException("Ошибка валидации. Все поля на обновления должны быть заполнены");
-        }
+        return userService.update(newUser);
     }
+
 }
