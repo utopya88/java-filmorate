@@ -29,7 +29,7 @@ public class FilmController {
        return filmService.create(film);
     }
 
-    @ResponseStatus(HttpStatus.CREATED)
+    @ResponseStatus(HttpStatus.OK)
     @PutMapping
     public Film update(@RequestBody Film newFilm) {
         return filmService.update(newFilm);

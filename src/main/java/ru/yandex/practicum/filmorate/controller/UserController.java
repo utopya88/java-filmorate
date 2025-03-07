@@ -33,7 +33,7 @@ public class UserController {
         return userService.create(user);
     }
 
-    @ResponseStatus(HttpStatus.CREATED)
+    @ResponseStatus(HttpStatus.OK)
     @PutMapping
     public User update(@RequestBody User newUser) {
         return userService.update(newUser);
