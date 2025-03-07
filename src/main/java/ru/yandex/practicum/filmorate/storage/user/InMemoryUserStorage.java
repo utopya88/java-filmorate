@@ -13,7 +13,7 @@ import java.util.*;
 
 @Slf4j
 @Component
-public class InMemoryUserStorage implements UserStorage{
+public class InMemoryUserStorage implements UserStorage {
 
     public static int userId = 0;
 
@@ -64,7 +64,7 @@ public class InMemoryUserStorage implements UserStorage{
     }
 
     @Override
-    public User getUserById (Integer id) {
+    public User getUserById(Integer id) {
         return users.get(id);
     }
 
@@ -74,7 +74,7 @@ public class InMemoryUserStorage implements UserStorage{
     }
 
     @Override
-    public boolean isFindUserById (Integer id) {
+    public boolean isFindUserById(Integer id) {
         if (users.get(id) == null) {
             throw new FindObjectException("ошибка, идентификатор равен нулю");
         }
