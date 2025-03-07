@@ -28,11 +28,11 @@ public class UserService {
         return userStorage.getUserById(id).get();
     }
 
-    public ArrayList<User> viewInterFriends(Integer idFriendOne, Integer idFriendTwo) {
+    public List<User> viewInterFriends(Integer idFriendOne, Integer idFriendTwo) {
         Set<Integer> firstFriendSet = getUserById(idFriendOne).getFriends();
         Set<Integer> secondFriendSet = getUserById(idFriendTwo).getFriends();
         firstFriendSet.retainAll(secondFriendSet);
-        ArrayList<User> interFriends = new ArrayList<>();
+        List<User> interFriends = new ArrayList<>();
         for (Integer i: firstFriendSet) {
             interFriends.add(getUserById(i));
         }
