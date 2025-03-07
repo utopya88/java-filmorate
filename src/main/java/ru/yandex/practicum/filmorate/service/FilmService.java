@@ -26,24 +26,22 @@ public class FilmService {
 
     public Integer addLike(Integer id, Integer userId) {
         Film film = filmStorage.findFilmById(id).get();
-        User user =  userStorage.getUserById(userId).get();
-        if (film.getLikes().contains(user.getId())) {
+        if (film.getLikes().contains(userId)) {
             throw new ValidationException("Этот пользователь уже ставил лайк фильму");
         }
         film.setRate(film.getRate() + 1);
-        film.getLikes().add(user.getId());
+        film.getLikes().add(userId);
         log.trace("Добавили лайк и пользователя который поставил лайк фильму");
         return film.getRate();
     }
 
     public Integer deleteLike(Integer id, Integer userId) {
         Film film = filmStorage.findFilmById(id).get();
-        User user = userStorage.getUserById(userId).get();
-        if (!film.getLikes().contains(user.getId())) {
+        if (!film.getLikes().contains(userId)) {
             throw new FindObjectException("Не найден лайк пользователя на фильме пользователь");
         }
         film.setRate(film.getRate() - 1);
-        film.getLikes().remove(user.getId());
+        film.getLikes().remove(userId);
         log.trace("Удалили лайк и пользователя который поставил лайк");
         return film.getRate();
     }
@@ -61,6 +59,9 @@ public class FilmService {
     }
 
     public Film create(Film film) {
+        if (filmStorage.findAll().contains(film)) {
+            throw new ValidationException("Данный фильм уже существует");
+        }
         return filmStorage.create(film).get();
     }
 
