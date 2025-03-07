@@ -28,6 +28,9 @@ public class FilmService {
         if (film.getLikes().contains(userId)) {
             throw new ValidationException("Этот пользователь уже ставил лайк фильму");
         }
+        if (!userStorage.isFindUserById(userId)) {
+            throw new FindObjectException("Такого пользователя не существует");
+        }
         int rate = film.getRate() + 1;
         film.setRate(rate);
         film.getLikes().add(userId);
