@@ -9,9 +9,7 @@ import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 
@@ -27,7 +25,7 @@ public class UserService {
     }
 
     public User getUserById(Integer id) {
-        if(!userStorage.isFindUserById(id)){
+        if (!userStorage.isFindUserById(id)) {
             throw new FindObjectException("Пользователь с таким идентификатором не найден");
         }
         return userStorage.getUserById(id).get();
