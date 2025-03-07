@@ -64,8 +64,11 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public User getUserById(Integer id) {
-        return users.get(id);
+    public Optional<User> getUserById(Integer id) {
+        if (users.get(id) == null) {
+            throw new FindObjectException("Не найден пользователь");
+        }
+        return Optional.of(users.get(id));
     }
 
     @Override

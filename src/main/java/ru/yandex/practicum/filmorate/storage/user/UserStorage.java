@@ -16,7 +16,7 @@ public interface UserStorage {
 
     int getNextId();
 
-    User getUserById(Integer id);
+    Optional<User> getUserById(Integer id);
 
     boolean isFindUserById(Integer id);
 }
