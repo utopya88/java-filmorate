@@ -28,7 +28,8 @@ public class FilmService {
         if (film.getLikes().contains(userId)) {
             throw new ValidationException("Этот пользователь уже ставил лайк фильму");
         }
-        film.setRate(film.getRate() + 1);
+        int rate = film.getRate() + 1;
+        film.setRate(rate);
         film.getLikes().add(userId);
         log.trace("Добавили лайк и пользователя который поставил лайк фильму");
         return film.getRate();
@@ -39,7 +40,11 @@ public class FilmService {
         if (!film.getLikes().contains(userId)) {
             throw new FindObjectException("Не найден лайк пользователя на фильме пользователь");
         }
-        film.setRate(film.getRate() - 1);
+        if (film.getRate() == null) {
+            throw new ValidationException("Значение рейтинга равна нулю");
+        }
+        int rate = film.getRate() - 1;
+        film.setRate(rate);
         film.getLikes().remove(userId);
         log.trace("Удалили лайк и пользователя который поставил лайк");
         return film.getRate();
