@@ -25,12 +25,12 @@ public class UserService {
     }
 
     public ArrayList<User> viewInterFriends(Integer idFriendOne, Integer idFriendTwo) {
-        Set<Integer> firstFriendSet = userStorage.getUserById(idFriendOne).getFriends();
-        Set<Integer> secondFriendSet = userStorage.getUserById(idFriendTwo).getFriends();
+        Set<Integer> firstFriendSet = userStorage.getUserById(idFriendOne).get().getFriends();
+        Set<Integer> secondFriendSet = userStorage.getUserById(idFriendTwo).get().getFriends();
         firstFriendSet.retainAll(secondFriendSet);
         ArrayList<User> interFriends = new ArrayList<>();
         for (Integer i: firstFriendSet) {
-            interFriends.add(userStorage.getUserById(i));
+            interFriends.add(userStorage.getUserById(i).get());
         }
         log.trace("Вернули общий список друзей у двух пользователей");
         return interFriends;
@@ -38,22 +38,22 @@ public class UserService {
 
     public List<User> returnFriendsList(Integer id) {
         List<User> friend = new ArrayList<>();
-        for (Integer i: userStorage.getUserById(id).getFriends()) {
-            friend.add(userStorage.getUserById(i));
+        for (Integer i: userStorage.getUserById(id).get().getFriends()) {
+            friend.add(userStorage.getUserById(i).get());
         }
         return friend;
     }
 
     public boolean addFriend(Integer id, Integer friendId) {
-         userStorage.getUserById(id).getFriends().add(friendId);
-         userStorage.getUserById(friendId).getFriends().add(id);
+         userStorage.getUserById(id).get().getFriends().add(friendId);
+         userStorage.getUserById(friendId).get().getFriends().add(id);
          log.trace("Добавили друзей друг другу");
          return true;
     }
 
     public boolean deleteFriend(Integer id, Integer friendId) {
-        userStorage.getUserById(id).getFriends().remove(friendId);
-        userStorage.getUserById(friendId).getFriends().remove(id);
+        userStorage.getUserById(id).get().getFriends().remove(friendId);
+        userStorage.getUserById(friendId).get().getFriends().remove(id);
         log.trace("Удалили друзей у друг друга");
         return true;
     }
