@@ -43,7 +43,7 @@ public class UserService {
     public List<User> returnFriendsList(Integer id) {
         List<User> friend = new ArrayList<>();
         for (Integer i: getUserById(id).getFriends()) {
-            friend.add(getUserById(id));
+            friend.add(getUserById(i));
         }
         return friend;
     }
