@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.controller;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import ru.yandex.practicum.filmorate.model.User;
@@ -19,16 +20,20 @@ public class UserController {
         this.userService = userService;
     }
 
+
+    @ResponseStatus(HttpStatus.OK)
     @GetMapping
     public ArrayList<User> findAll() {
         return userService.findAllUsers();
     }
 
+    @ResponseStatus(HttpStatus.CREATED)
     @PostMapping
     public User create(@RequestBody User user) {
         return userService.create(user);
     }
 
+    @ResponseStatus(HttpStatus.CREATED)
     @PutMapping
     public User update(@RequestBody User newUser) {
         return userService.update(newUser);

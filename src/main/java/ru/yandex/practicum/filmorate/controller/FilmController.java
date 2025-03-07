@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.controller;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import ru.yandex.practicum.filmorate.model.Film;
@@ -16,16 +17,19 @@ public class FilmController {
         this.filmService = filmService;
     }
 
+    @ResponseStatus(HttpStatus.OK)
     @GetMapping
     public List<Film> findAll() {
         return filmService.findAllFilms();
     }
 
+    @ResponseStatus(HttpStatus.CREATED)
     @PostMapping
     public Film create(@RequestBody Film film) {
        return filmService.create(film);
     }
 
+    @ResponseStatus(HttpStatus.CREATED)
     @PutMapping
     public Film update(@RequestBody Film newFilm) {
         return filmService.update(newFilm);
