@@ -24,13 +24,17 @@ public class UserService {
         this.userStorage = userStorage;
     }
 
+    public User getUserById(Integer id) {
+        return userStorage.getUserById(id).get();
+    }
+
     public ArrayList<User> viewInterFriends(Integer idFriendOne, Integer idFriendTwo) {
-        Set<Integer> firstFriendSet = userStorage.getUserById(idFriendOne).get().getFriends();
-        Set<Integer> secondFriendSet = userStorage.getUserById(idFriendTwo).get().getFriends();
+        Set<Integer> firstFriendSet = getUserById(idFriendOne).getFriends();
+        Set<Integer> secondFriendSet = getUserById(idFriendTwo).getFriends();
         firstFriendSet.retainAll(secondFriendSet);
         ArrayList<User> interFriends = new ArrayList<>();
         for (Integer i: firstFriendSet) {
-            interFriends.add(userStorage.getUserById(i).get());
+            interFriends.add(getUserById(i));
         }
         log.trace("Вернули общий список друзей у двух пользователей");
         return interFriends;
@@ -38,22 +42,22 @@ public class UserService {
 
     public List<User> returnFriendsList(Integer id) {
         List<User> friend = new ArrayList<>();
-        for (Integer i: userStorage.getUserById(id).get().getFriends()) {
-            friend.add(userStorage.getUserById(i).get());
+        for (Integer i: getUserById(id).getFriends()) {
+            friend.add(getUserById(id));
         }
         return friend;
     }
 
     public boolean addFriend(Integer id, Integer friendId) {
-         userStorage.getUserById(id).get().getFriends().add(friendId);
-         userStorage.getUserById(friendId).get().getFriends().add(id);
+         getUserById(id).getFriends().add(friendId);
+         getUserById(friendId).getFriends().add(id);
          log.trace("Добавили друзей друг другу");
          return true;
     }
 
     public boolean deleteFriend(Integer id, Integer friendId) {
-        userStorage.getUserById(id).get().getFriends().remove(friendId);
-        userStorage.getUserById(friendId).get().getFriends().remove(id);
+        getUserById(id).getFriends().remove(friendId);
+        getUserById(friendId).getFriends().remove(id);
         log.trace("Удалили друзей у друг друга");
         return true;
     }
