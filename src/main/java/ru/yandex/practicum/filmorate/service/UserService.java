@@ -29,14 +29,14 @@ public class UserService {
         Set<Integer> secondFriendSet = userStorage.getUserById(idFriendTwo).getFriends();
         firstFriendSet.retainAll(secondFriendSet);
         ArrayList<User> interFriends = new ArrayList<>();
-        for(Integer i: firstFriendSet){
+        for (Integer i: firstFriendSet) {
             interFriends.add(userStorage.getUserById(i));
         }
         log.trace("Вернули общий список друзей у двух пользователей");
         return interFriends;
     }
 
-    public List<User> returnFriendsList (Integer id) {
+    public List<User> returnFriendsList(Integer id) {
         List<User> friend = new ArrayList<>();
         for (Integer i: userStorage.getUserById(id).getFriends()) {
             friend.add(userStorage.getUserById(i));
