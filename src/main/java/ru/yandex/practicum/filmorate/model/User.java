@@ -18,7 +18,7 @@ public class User {
     LocalDate birthday;
     private Set<Integer> friends;
 
-    public Set<Integer> getFriends(){
+    public Set<Integer> getFriends() {
         return friends;
     }
 }
