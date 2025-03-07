@@ -23,7 +23,7 @@ public class ErrorHandler {
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public ErrorResponse ThrowableHandler(final Throwable e) {
+    public ErrorResponse throwableHandler(final Throwable e) {
         return new ErrorResponse(e.getMessage());
     }
 }
