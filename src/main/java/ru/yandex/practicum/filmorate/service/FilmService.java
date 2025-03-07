@@ -71,7 +71,7 @@ public class FilmService {
         return filmStorage.update(film).get();
     }
 
-    public ArrayList<Film> findAllFilms() {
+    public List<Film> findAllFilms() {
         return filmStorage.findAll();
     }
 
