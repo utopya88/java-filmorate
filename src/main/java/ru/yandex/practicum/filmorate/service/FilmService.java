@@ -24,7 +24,7 @@ public class FilmService {
     private final UserStorage userStorage;
 
     public Integer addLike(Integer id, Integer userId) {
-        Film film = filmStorage.findFilmById(id).get();
+        Film film = getFilm(id);
         if (film.getLikes().contains(userId)) {
             throw new ValidationException("Этот пользователь уже ставил лайк фильму");
         }
@@ -36,7 +36,7 @@ public class FilmService {
     }
 
     public Integer deleteLike(Integer id, Integer userId) {
-        Film film = filmStorage.findFilmById(id).get();
+        Film film = getFilm(id);
         if (!film.getLikes().contains(userId)) {
             throw new FindObjectException("Не найден лайк пользователя на фильме пользователь");
         }
@@ -78,6 +78,10 @@ public class FilmService {
 
     public List<Film> findAllFilms() {
         return filmStorage.findAll();
+    }
+
+    public Film getFilm(Integer id) {
+        return filmStorage.findFilmById(id).get();
     }
 
 }

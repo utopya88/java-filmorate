@@ -18,6 +18,6 @@ public class Film {
     @NonNull
     private LocalDate releaseDate;
     private int duration;
-    private Integer rate;
+    private Integer rate = 0;
     private Set<Integer> likes = new HashSet<>();
 }
