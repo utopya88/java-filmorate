@@ -3,6 +3,7 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.*;
 
 import ru.yandex.practicum.filmorate.exception.FindObjectException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
@@ -12,6 +13,7 @@ import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -56,13 +58,12 @@ public class FilmService {
             log.warn("Фиговый каунт");
             throw new ValidationException("Ошибка. Получено значение меньше нуля");
         }
-        ArrayList<Film> hash = new ArrayList<>(filmStorage.findAll());
-        hash.sort(Comparator.comparing(Film::getRate));
-        ArrayList<Film> finalFilms = new ArrayList<>();
-        for (int i = 0; i < count; i++) {
-            finalFilms.add(hash.get(i));
-        }
-        return finalFilms;
+        List<Film> result = filmStorage.findAll();
+        result.sort(Comparator.comparing(Film::getRate));
+        log.trace("Фильтранулись на кол-во лайков и вывели заданное кол-во лайков");
+        return result.stream()
+                .limit(count)
+                .collect(Collectors.toList());
     }
 
     public Film create(Film film) {
@@ -86,4 +87,5 @@ public class FilmService {
     public Film getFilm(Integer id) {
         return filmStorage.findFilmById(id).get();
     }
+
 }
