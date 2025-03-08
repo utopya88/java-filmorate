@@ -20,4 +20,8 @@ public class Film {
     private int duration;
     private Integer rate = 0;
     private Set<Integer> likes = new HashSet<>();
+
+    public Integer getLikesCount() {
+        return likes.size();
+    }
 }

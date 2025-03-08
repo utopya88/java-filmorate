@@ -59,7 +59,7 @@ public class FilmService {
             throw new ValidationException("Ошибка. Получено значение меньше нуля");
         }
         List<Film> result = new ArrayList<>(filmStorage.findAll());
-        result.sort(Comparator.comparing(Film::getRate));
+        result.sort(Comparator.comparing(Film::getLikesCount));
         log.trace("Фильтранулисcь на кол-во лайков и вывели заданное кол-во лайков");
         return result.stream()
                 .limit(count)
