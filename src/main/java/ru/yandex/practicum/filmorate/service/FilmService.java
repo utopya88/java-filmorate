@@ -58,10 +58,9 @@ public class FilmService {
             log.warn("Фиговый каунт");
             throw new ValidationException("Ошибка. Получено значение меньше нуля");
         }
-        List<Film> result = new ArrayList<>(filmStorage.findAll());
-        result.sort(Comparator.comparing(Film::getLikesCount));
         log.trace("Фильтранулисcь на кол-во лайков и вывели заданное кол-во лайков");
-        return result.stream()
+        return new ArrayList<>(filmStorage.findAll()).stream()
+                .sorted((f1,f2) -> f2.getLikesCount() - f1.getLikesCount())
                 .limit(count)
                 .collect(Collectors.toList());
     }
