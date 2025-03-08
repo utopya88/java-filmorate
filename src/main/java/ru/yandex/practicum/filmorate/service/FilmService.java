@@ -58,11 +58,13 @@ public class FilmService {
             log.warn("Фиговый каунт");
             throw new ValidationException("Ошибка. Получено значение меньше нуля");
         }
-        List<Film> result = filmStorage.findAll().stream().sorted(Comparator.comparing(Film::getRate)).toList();
-        log.trace("Фильтранулись на кол-во лайков и вывели заданное кол-во лайков");
-        return result.stream()
-                .limit(count)
-                .collect(Collectors.toList());
+        ArrayList<Film> hash = new ArrayList<>(filmStorage.findAll());
+        hash.sort(Comparator.comparing(Film::getRate));
+        ArrayList<Film> finalFilms = new ArrayList<>();
+        for (int i = 0; i < count; i++){
+            finalFilms.add(hash.get(i));
+        }
+        return finalFilms;
     }
 
     public Film create(Film film) {
@@ -86,5 +88,4 @@ public class FilmService {
     public Film getFilm(Integer id) {
         return filmStorage.findFilmById(id).get();
     }
-
 }
