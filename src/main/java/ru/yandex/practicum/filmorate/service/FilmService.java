@@ -13,6 +13,7 @@ import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -57,10 +58,12 @@ public class FilmService {
             log.warn("Фиговый каунт");
             throw new ValidationException("Ошибка. Получено значение меньше нуля");
         }
-        List<Film> result = filmStorage.findAll();
+        List<Film> result = new ArrayList<>(filmStorage.findAll());
         result.sort(Comparator.comparing(Film::getRate));
         log.trace("Фильтранулисcь на кол-во лайков и вывели заданное кол-во лайков");
-        return new ArrayList<>(result.subList(0, count));
+        return result.stream()
+                .limit(count)
+                .collect(Collectors.toList());
     }
 
     public Film create(Film film) {
