@@ -61,9 +61,11 @@ public class FilmService {
         List<Film> result = filmStorage.findAll();
         result.sort(Comparator.comparing(Film::getRate));
         log.trace("Фильтранулисcь на кол-во лайков и вывели заданное кол-во лайков");
-        return result.stream()
-                .limit(count)
-                .collect(Collectors.toList());
+        List<Film> finals = new ArrayList<>();
+        for (int i = 0; i < count; i++) {
+            finals.add(result.get(i));
+        }
+        return finals;
     }
 
     public Film create(Film film) {
