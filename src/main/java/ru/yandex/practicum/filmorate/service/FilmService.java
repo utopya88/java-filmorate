@@ -13,7 +13,6 @@ import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -61,11 +60,7 @@ public class FilmService {
         List<Film> result = filmStorage.findAll();
         result.sort(Comparator.comparing(Film::getRate));
         log.trace("Фильтранулисcь на кол-во лайков и вывели заданное кол-во лайков");
-        List<Film> finals = new ArrayList<>();
-        for (int i = 0; i < count; i++) {
-            finals.add(result.get(i));
-        }
-        return finals;
+        return new ArrayList<>(result.subList(0, count));
     }
 
     public Film create(Film film) {
