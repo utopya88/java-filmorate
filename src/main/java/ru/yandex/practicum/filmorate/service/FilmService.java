@@ -3,7 +3,6 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.*;
 
 import ru.yandex.practicum.filmorate.exception.FindObjectException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
@@ -13,7 +12,6 @@ import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -61,7 +59,7 @@ public class FilmService {
         ArrayList<Film> hash = new ArrayList<>(filmStorage.findAll());
         hash.sort(Comparator.comparing(Film::getRate));
         ArrayList<Film> finalFilms = new ArrayList<>();
-        for (int i = 0; i < count; i++){
+        for (int i = 0; i < count; i++) {
             finalFilms.add(hash.get(i));
         }
         return finalFilms;
