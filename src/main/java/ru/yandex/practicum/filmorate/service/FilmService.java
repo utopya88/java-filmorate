@@ -60,7 +60,7 @@ public class FilmService {
         }
         List<Film> result = filmStorage.findAll();
         result.sort(Comparator.comparing(Film::getRate));
-        log.trace("Фильтранулись на кол-во лайков и вывели заданное кол-во лайков");
+        log.trace("Фильтранулисcь на кол-во лайков и вывели заданное кол-во лайков");
         return result.stream()
                 .limit(count)
                 .collect(Collectors.toList());
