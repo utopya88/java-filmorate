@@ -15,9 +15,9 @@ import java.util.*;
 @Component
 public class InMemoryUserStorage implements UserStorage {
 
-    public static int userId = 0;
+    private static int userId = 0;
 
-    public final Map<Integer,User> users = new HashMap<>();
+    private final Map<Integer,User> users = new HashMap<>();
 
     @Override
     public ArrayList<User> findAll() {
@@ -71,8 +71,7 @@ public class InMemoryUserStorage implements UserStorage {
         return Optional.of(users.get(id));
     }
 
-    @Override
-    public int getNextId() {
+    private int getNextId() {
         return ++userId;
     }
 

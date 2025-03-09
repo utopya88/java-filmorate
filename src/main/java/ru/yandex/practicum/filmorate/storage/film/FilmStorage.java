@@ -14,9 +14,7 @@ public interface FilmStorage {
 
     Optional<Film> update(@RequestBody Film newFilm);
 
-    int getNextId();
-
-    Optional<Film> findFilmById(Integer id);
+    Film findFilmById(Integer id);
 
     boolean isFindFilmById(Integer id);
 

@@ -67,16 +67,15 @@ public class InMemoryFilmStorage implements FilmStorage {
         return films.get(id);
     }
 
-    public Optional<Film> findFilmById(Integer filmId) {
+    public Film findFilmById(Integer filmId) {
         if (films.get(filmId) == null) {
             log.warn("Фильм № {} не найден", filmId);
             throw new FindObjectException("Фильм не найден");
         }
-        return Optional.of(films.get(filmId));
+        return films.get(filmId);
     }
 
-    @Override
-    public int getNextId() {
+    private int getNextId() {
         return ++filmId;
     }
 

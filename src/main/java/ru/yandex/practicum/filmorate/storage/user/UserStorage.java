@@ -14,8 +14,6 @@ public interface UserStorage {
 
     Optional<User> update(@RequestBody User newUser);
 
-    int getNextId();
-
     Optional<User> getUserById(Integer id);
 
     boolean isFindUserById(Integer id);
