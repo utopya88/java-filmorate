@@ -35,7 +35,7 @@ public class FilmDbStorage implements FilmStorage {
         values.put("duration", film.getDuration());
         values.put("rate", film.getRate());
 
-        film.setId(simpleJdbcInsert.executeAndReturnKey(values).longValue());
+        film.setId(simpleJdbcInsert.executeAndReturnKey(values).intValue());
         return Optional.of(film);
     }
 
