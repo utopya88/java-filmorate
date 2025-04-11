@@ -2,67 +2,87 @@ package ru.yandex.practicum.filmorate.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.*;
 
-import ru.yandex.practicum.filmorate.exception.ValidationException;
+import ru.yandex.practicum.filmorate.exception.FindObjectException;
 import ru.yandex.practicum.filmorate.model.User;
-import static ru.yandex.practicum.filmorate.utils.ValidationController.validateUser;
+import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 
-import java.text.ParseException;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
 
 @Slf4j
 @Service
 public class UserService {
 
-    public static int userId = 0;
-    public final Map<Integer, User> users = new HashMap<>();
+    private final UserStorage userStorage;
 
-    public Collection<User> findAll() {
-         log.trace("Получены все пользователи");
-         return users.values();
+
+    public UserService(UserStorage userStorage) {
+        this.userStorage = userStorage;
     }
 
-    public User create(@RequestBody User user) throws ParseException {
-        if (validateUser(user)) {
-            user.setId(getNextId());
-            users.put(user.getId(),user);
-            log.info("Получены следующие значения:{}, {}, {}, {}", "user.getEmail()", "user.getName()",
-                    "user.getLogin()", "user.getBirthday()");
-            return user;
-        } else {
-            log.warn("Получены следующие значения:{}, {}, {}, {}", "user.getEmail()", "user.getName()",
-                    "user.getLogin()", "user.getBirthday()");
-            throw new ValidationException("Ошибка валидации фильма. Исправьте ошибку и попробуйте снова");
+    public User getUserById(Integer id) {
+        if (!userStorage.isFindUserById(id)) {
+            throw new FindObjectException("Пользователь с таким идентификатором не найден");
         }
+        return userStorage.getUserById(id).get();
     }
 
-    public User update(@RequestBody User newUser) throws ParseException {
-        if (newUser.getId() == null) {
-            throw new ValidationException("Необходимо указать Ид фильма");
+    public List<User> viewInterFriends(Integer idFriendOne, Integer idFriendTwo) {
+        if (!userStorage.isFindUserById(idFriendOne) || !userStorage.isFindUserById(idFriendTwo)) {
+            throw new FindObjectException("Пользователь с таким идентификатором не найден");
         }
-        if (users.containsKey(newUser.getId())) {
-            User oldUser = users.get(newUser.getId());
-            if (validateUser(newUser)) {
-                oldUser.setName(newUser.getName());
-                oldUser.setLogin(newUser.getLogin());
-                oldUser.setEmail(newUser.getEmail());
-                oldUser.setBirthday(newUser.getBirthday());
-            }
-            log.info("Получены следующие значения:{}, {}, {}, {}", "newUser.getEmail()", "newUser.getName()",
-                    "newUser.getLogin()", "newUser.getBirthday()");
-            return oldUser;
-        } else {
-            log.warn("Получены следующие значения:{}, {}, {}, {}", "newUser.getEmail()", "newUser.getName()",
-                    "newUser.getLogin()", "newUser.getBirthday()");
-            throw new ValidationException("Ошибка валидации. Все поля на обновления должны быть заполнены");
-        }
+        return returnFriendsList(idFriendOne).stream()
+                .filter(f -> returnFriendsList(idFriendTwo).contains(f))
+                .collect(Collectors.toList());
     }
 
-    private int getNextId() {
-        return ++userId;
+    public List<User> returnFriendsList(Integer id) {
+        List<User> friend = new ArrayList<>();
+        for (Integer i: getUserById(id).getFriends()) {
+            friend.add(getUserById(i));
+        }
+        return friend;
+    }
+
+    public boolean addFriend(Integer id, Integer friendId) {
+        if (!userStorage.isFindUserById(id) || !userStorage.isFindUserById(friendId)) {
+            throw new FindObjectException("Не найден идентификатор пользователя или его друга");
+        }
+         getUserById(id).getFriends().add(friendId);
+         getUserById(friendId).getFriends().add(id);
+         log.trace("Добавили друзей друг другу");
+         return true;
+    }
+
+    public boolean deleteFriend(Integer id, Integer friendId) {
+        if (!userStorage.isFindUserById(id) || !userStorage.isFindUserById(friendId)) {
+            throw new FindObjectException("Не найден идентификатор пользователя или его друга");
+        }
+        getUserById(id).getFriends().remove(friendId);
+        getUserById(friendId).getFriends().remove(id);
+        log.trace("Удалили друзей у друг друга");
+        return true;
+    }
+
+    public User create(User user) {
+        if (userStorage.findAll().contains(user)) {
+            throw new FindObjectException("Такой пользователь уже существуют");
+        }
+        return userStorage.create(user).get();
+    }
+
+    public User update(User user) {
+        if (!userStorage.isFindUserById(user.getId())) {
+            throw new FindObjectException("Не найден обьект для обновления");
+        }
+        return userStorage.update(user).get();
+    }
+
+    public ArrayList<User> findAllUsers() {
+        return userStorage.findAll();
     }
 }

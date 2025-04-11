@@ -1,16 +1,15 @@
 package ru.yandex.practicum.filmorate.controller;
 
-import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
 
+import java.util.ArrayList;
+import java.util.List;
 
-import java.text.ParseException;
-import java.util.Collection;
 
-@Slf4j
 @RestController
 @RequestMapping("/users")
 public class UserController {
@@ -21,19 +20,43 @@ public class UserController {
         this.userService = userService;
     }
 
+
+    @ResponseStatus(HttpStatus.OK)
     @GetMapping
-    public Collection<User> findAll() {
-        return userService.findAll();
+    public ArrayList<User> findAll() {
+        return userService.findAllUsers();
     }
 
+    @ResponseStatus(HttpStatus.CREATED)
     @PostMapping
-    public User create(@RequestBody User user) throws ParseException {
+    public User create(@RequestBody User user) {
         return userService.create(user);
     }
 
+    @ResponseStatus(HttpStatus.OK)
     @PutMapping
-    public User update(@RequestBody User newUser) throws ParseException {
+    public User update(@RequestBody User newUser) {
         return userService.update(newUser);
+    }
+
+    @PutMapping("/{id}/friends/{friendId}")
+    public boolean addFriends(@PathVariable Integer id, @PathVariable Integer friendId) {
+        return userService.addFriend(id, friendId);
+    }
+
+    @DeleteMapping("/{id}/friends/{friendId}")
+    public boolean deleteFriend(@PathVariable Integer id, @PathVariable Integer friendId) {
+        return userService.deleteFriend(id, friendId);
+    }
+
+    @GetMapping("/{id}/friends")
+    public List<User> returnFriendsList(@PathVariable Integer id) {
+        return userService.returnFriendsList(id);
+    }
+
+    @GetMapping("/{id}/friends/common/{otherId}")
+    public List<User> returnIntersectFriends(@PathVariable Integer id, @PathVariable Integer otherId) {
+        return userService.viewInterFriends(id, otherId);
     }
 
 }

@@ -1,71 +1,85 @@
 package ru.yandex.practicum.filmorate.service;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.*;
 
-import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.exception.FindObjectException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
-import static ru.yandex.practicum.filmorate.utils.ValidationController.validateFilm;
+import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
-import java.text.ParseException;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class FilmService {
 
-    public static int filmId = 0;
-    public final Map<Integer, Film> films = new HashMap<>();
+    private final FilmStorage filmStorage;
+    private final UserStorage userStorage;
 
-    public Collection<Film> findAll() {
-        log.trace("Получены все пользователи");
-        return films.values();
-    }
-
-    @PostMapping
-    public Film create(@RequestBody Film film) throws ParseException {
-        if (validateFilm(film)) {
-            film.setId(getNextId());
-            films.put(film.getId(),film);
-            log.info("Получены следующие значения:{}, {}, {}, {}", "film.setName()", "film.setDuration()",
-                    "film.setDescription()", "film.setReleaseDate()");
-            films.put(film.getId(), film);
-            return film;
-        } else {
-            log.warn("Получены следующие значения:{}, {}, {}, {}", "film.setName()", "film.setDuration()",
-                    "film.setDescription()", "film.setReleaseDate()");
-            throw new ValidationException("Ошибка валидации фильма. Исправьте ошибку и попробуйте снова");
+    public Integer addLike(Integer id, Integer userId) {
+        Film film = filmStorage.findFilmById(id);
+        if (film.getLikes().contains(userId)) {
+            throw new ValidationException("Этот пользователь уже ставил лайк фильму");
         }
-    }
-
-    @PutMapping
-    public Film update(@RequestBody Film newFilm) throws ParseException {
-        if (newFilm.getId() == null) {
-            throw new ValidationException("Необходимо указать Ид фильма");
+        if (!userStorage.isFindUserById(userId)) {
+            throw new FindObjectException("Такого пользователя не существует");
         }
-        if (films.containsKey(newFilm.getId())) {
-            Film oldFilm = films.get(newFilm.getId());
-            if (validateFilm(newFilm)) {
-                oldFilm.setName(newFilm.getName());
-                oldFilm.setDuration(newFilm.getDuration());
-                oldFilm.setDescription(newFilm.getDescription());
-                oldFilm.setReleaseDate(newFilm.getReleaseDate());
-            }
-            log.info("Получены следующие значения:{}, {}, {}, {}", "newFilm.setName()", "newFilm.setDuration()",
-                    "newFilm.setDescription()", "newFilm.setReleaseDate()");
-            return oldFilm;
-        } else {
-            log.warn("Получены следующие значения:{}, {}, {}, {}", "newFilm.setName()", "newFilm.setDuration()",
-                    "newFilm.setDescription()", "newFilm.setReleaseDate()");
-            throw new ValidationException("Ошибка валидации. Все поля на обновления должны быть заполнены");
+        int rate = film.getRate() + 1;
+        film.setRate(rate);
+        film.getLikes().add(userId);
+        log.trace("Добавили лайк и пользователя который поставил лайк фильму");
+        return film.getRate();
+    }
+
+    public Integer deleteLike(Integer id, Integer userId) {
+        Film film = filmStorage.findFilmById(id);
+        if (!film.getLikes().contains(userId)) {
+            throw new FindObjectException("Не найден лайк пользователя на фильме пользователь");
         }
+        if (film.getRate() == null) {
+            throw new ValidationException("Значение рейтинга равна нулю");
+        }
+        int rate = film.getRate() - 1;
+        film.setRate(rate);
+        film.getLikes().remove(userId);
+        log.trace("Удалили лайк и пользователя который поставил лайк");
+        return film.getRate();
     }
 
-    private int getNextId() {
-        return ++filmId;
+    public List<Film> getFilmsForLikes(Integer count) {
+        if (count < 0) {
+            log.warn("Фиговый каунт");
+            throw new ValidationException("Ошибка. Получено значение меньше нуля");
+        }
+        log.trace("Фильтранулисcь на кол-во лайков и вывели заданное кол-во лайков");
+        return new ArrayList<>(filmStorage.findAll()).stream()
+                .sorted((f1,f2) -> f2.getLikesCount() - f1.getLikesCount())
+                .limit(count)
+                .collect(Collectors.toList());
     }
 
+    public Film create(Film film) {
+        if (filmStorage.findAll().contains(film)) {
+            throw new ValidationException("Данный фильм уже существует");
+        }
+        return filmStorage.create(film).get();
+    }
+
+    public Film update(Film film) {
+        if (!filmStorage.isFindFilmById(film.getId())) {
+            throw new FindObjectException("Не найден обьект для обновления");
+        }
+        return filmStorage.update(film).get();
+    }
+
+    public List<Film> findAllFilms() {
+        return filmStorage.findAll();
+    }
 }
