@@ -58,15 +58,15 @@ public class FilmDbStorage implements FilmStorage {
         return jdbcTemplate.update(sqlQuery, filmId) > 0;
     }
 
-    public ArrayList<Film> findAll() {
+    public List<Film> findAll() {
         String sqlQuery = "SELECT * FROM films";
         return jdbcTemplate.query(sqlQuery, this::makeFilm);
     }
 
-    public Optional<Film> findFilmById(long filmId) {
-        String sqlQuery = "select * from films where film_id = ?";
+    public Film findFilmById(Integer filmId) {
+        String sqlQuery = "SELECT * FROM films WHERE film_id = ?";
         try {
-            return Optional.of(jdbcTemplate.queryForObject(sqlQuery, this::makeFilm, filmId));
+            return jdbcTemplate.queryForObject(sqlQuery, this::makeFilm, filmId);
         } catch (EmptyResultDataAccessException e) {
             log.warn("Фильм № {} не найден", filmId);
             throw new FindObjectException(String.format("Фильм с идентификатором № %d не найден", filmId));

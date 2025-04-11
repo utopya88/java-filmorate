@@ -3,12 +3,12 @@ package ru.yandex.practicum.filmorate.storage.user;
 import org.springframework.web.bind.annotation.RequestBody;
 import ru.yandex.practicum.filmorate.model.User;
 
-import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 public interface UserStorage {
 
-    ArrayList<User> findAll();
+    List<User> findAll();
 
     Optional<User> create(@RequestBody User user);
 

@@ -65,7 +65,7 @@ public class UserDbStorage implements UserStorage {
     }
 
     @Override
-    public ArrayList<User> findAll() {
+    public List<User> findAll() {
         String sqlQuery = "SELECT * FROM users";
         return jdbcTemplate.query(sqlQuery, this::makeUser);
     }
@@ -111,7 +111,7 @@ public class UserDbStorage implements UserStorage {
         return jdbcTemplate.update(sqlQuery, friendRequest.getId(), friendResponse.getId()) > 0;
     }
 
-    public List<Long> findFriends(Integer id) {
+    public List<Integer> findFriends(Integer id) {
         String sqlQuery = "select response_friend_id from friends " +
                 "where request_friend_id = ?";
         return jdbcTemplate.query(sqlQuery, (rs, rowNum) -> rs.getInt("response_friend_id"), id);
