@@ -88,7 +88,7 @@ public class UserDbStorage implements UserStorage {
             return true;
         }
         log.warn("Пользователь с идентификатором № {} не найден", userId);
-        throw new UserNotFoundException(String.format("Пользователь с идентификатором № %d не найден", userId));
+        throw new FindObjectException(String.format("Пользователь с идентификатором № %d не найден", userId));
     }
 
     private User makeUser(ResultSet rs, int rowNum) throws SQLException {
