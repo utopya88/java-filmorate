@@ -80,7 +80,7 @@ public class UserService {
         return userStorage.update(user).get();
     }
 
-    public ArrayList<User> findAllUsers() {
+    public List<User> findAllUsers() {
         return userStorage.findAll();
     }
 }
