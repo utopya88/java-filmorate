@@ -23,7 +23,7 @@ public class UserController {
 
     @ResponseStatus(HttpStatus.OK)
     @GetMapping
-    public ArrayList<User> findAll() {
+    public List<User> findAll() {
         return userService.findAllUsers();
     }
 
