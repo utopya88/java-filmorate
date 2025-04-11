@@ -1,28 +1,28 @@
 package ru.yandex.practicum.filmorate.service;
 
 import lombok.extern.slf4j.Slf4j;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.annotation.Qualifier;
+
 
 import ru.yandex.practicum.filmorate.exception.FindObjectException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
+import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-
-@Slf4j
 @Service
+@Slf4j
+@RequiredArgsConstructor
 public class UserService {
 
+    @Qualifier("userDbStorage")
     private final UserStorage userStorage;
-
-
-    public UserService(UserStorage userStorage) {
-        this.userStorage = userStorage;
-    }
 
     public User getUserById(Integer id) {
         if (!userStorage.isFindUserById(id)) {
