@@ -19,7 +19,7 @@ public class Buffer {
     @NotNull
     @NotBlank
     private String name;
-    @Description("New film update description")
+    @Description("Обновление описания")
     private String description;
     @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate releaseDate;

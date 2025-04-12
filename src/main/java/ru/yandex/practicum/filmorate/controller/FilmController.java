@@ -10,7 +10,6 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.FilmResponse;
 import ru.yandex.practicum.filmorate.service.FilmInterface;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
-import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -24,17 +23,14 @@ public class FilmController {
     private static final String DEFAULT_GENRE = "нет жанра";
 
     private final FilmStorage filmStorage;
-    private final UserStorage userStorage;
     private final FilmInterface filmInterface;
 
     @Autowired
     public FilmController(
             FilmStorage filmStorage,
-            UserStorage userStorage,
             FilmInterface filmInterface
     ) {
         this.filmStorage = filmStorage;
-        this.userStorage = userStorage;
         this.filmInterface = filmInterface;
     }
 
@@ -76,12 +72,6 @@ public class FilmController {
         return filmInterface.viewRating(count);
     }
 
-    /**
-     * преобразует json объект в объект Buffer
-     *
-     * @param objectNode json объект
-     * @return объект Buffer
-     */
     private Buffer parseObjectNodeToBuffer(ObjectNode objectNode) {
         Long id = objectNode.has("id") ? objectNode.get("id").asLong() : 0L;
         String name = objectNode.get("name").asText();
@@ -102,12 +92,6 @@ public class FilmController {
         );
     }
 
-    /**
-     * извлекает список жанров из json объекта
-     *
-     * @param objectNode json объект
-     * @return список жанров
-     */
     private List<String> extractGenresFromObjectNode(ObjectNode objectNode) {
         try {
             return objectNode.get("genres").findValuesAsText("id");

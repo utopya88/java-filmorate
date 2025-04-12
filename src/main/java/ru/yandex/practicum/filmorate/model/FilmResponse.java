@@ -22,7 +22,6 @@ public class FilmResponse {
     @NotNull
     @NotBlank
     private String name;
-    @Description("New film update description")
     private String description;
     @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate releaseDate;

@@ -19,30 +19,29 @@ import java.util.*;
 public class Film {
     private Long id;
 
-    @NotNull(message = "Название не может быть null")
-    @NotBlank(message = "Название не может быть пустым")
-    @Size(max = 100, message = "Название не может быть длиннее 100 символов")
+    @NotNull
+    @NotBlank
+    @Size(max = 100)
     private String name;
 
-    @Description("New film update description")
-    @Size(max = 200, message = "Максимальная длина описания — 200 символов")
+    @Size(max = 200)
     private String description;
 
-    @NotNull(message = "Дата релиза не может быть null")
+    @NotNull
     @JsonFormat(pattern = "yyyy-MM-dd")
     @PastOrPresent(message = "Дата релиза должна быть не раньше 28 декабря 1895 года")
     private LocalDate releaseDate;
 
-    @NotNull(message = "Продолжительность не может быть null")
-    @Positive(message = "Продолжительность фильма должна быть положительным числом")
+    @NotNull
+    @Positive
     private Integer duration;
 
     @JsonIgnore
     private Set<Long> likedUsers;
 
-    @NotNull(message = "Рейтинг MPA не может быть null")
-    @Min(value = 1, message = "Рейтинг MPA должен быть не меньше 1")
-    @Max(value = 5, message = "Рейтинг MPA должен быть не больше 5")
+    @NotNull
+    @Min(value = 1)
+    @Max(value = 5)
     private Long mpa;
 
     private LinkedHashSet<Long> genres;

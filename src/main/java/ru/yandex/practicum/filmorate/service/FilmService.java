@@ -14,7 +14,7 @@ import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 import java.util.*;
 
 @Service
-@Slf4j(topic = "TRACE")
+@Slf4j
 @RequiredArgsConstructor
 public class FilmService implements FilmInterface {
 
@@ -23,15 +23,14 @@ public class FilmService implements FilmInterface {
     private final JdbcTemplate jdbcTemplate;
 
     // SQL-запросы
-    private final String selectLikedUsersQuery = "select filmId, userId from likedUsers";
-    private final String insertLikeQuery = "insert into likedUsers(filmId, userId) values (?, ?)";
-    private final String selectFilmGenresQuery = "select filmId, genreId from filmGenre where filmId = ?";
-    private final String deleteLikeQuery = "delete from likedUsers where filmId = ? and userId = ?";
-    private final String selectTopFilmsQuery = "select f.id as name, COUNT(l.userId) as coun from likedUsers as l LEFT OUTER JOIN film AS f ON l.filmId = f.id GROUP BY f.name ORDER BY COUNT(l.userId) DESC LIMIT 10";
+    private final String selectLikedUsersQuery = "SELECT filmId, userId FROM likedUsers";
+    private final String insertLikeQuery = "INSERT INTO likedUsers(filmId, userId) VALUES (?, ?)";
+    private final String selectFilmGenresQuery = "SELECT filmId, genreId FROM filmGenre WHERE filmId = ?";
+    private final String deleteLikeQuery = "DELETE FROM likedUsers WHERE filmId = ? AND userId = ?";
+    private final String selectTopFilmsQuery = "SELECT f.id as name, COUNT(l.userId) as coun FROM likedUsers as l LEFT OUTER JOIN film AS f ON l.filmId = f.id GROUP BY f.name ORDER BY COUNT(l.userId) DESC LIMIT 10";
 
     @Override
     public FilmResponse addLike(Long idUser, Long idFilm) {
-        log.info("Обработка Post-запроса...");
         if (userStorage.findById(idUser) != null && filmStorage.findById(idFilm) != null) {
             Map<Long, Set<Long>> likedUsers = jdbcTemplate.query(selectLikedUsersQuery, new FilmDbStorage.LikedUsersExtractor());
             if (likedUsers.get(idFilm) != null && likedUsers.get(idFilm).contains(idUser)) {
