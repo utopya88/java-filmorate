@@ -1,9 +1,6 @@
 package ru.yandex.practicum.filmorate.service;
 
-import ru.yandex.practicum.filmorate.exception.DirectorNotFoundException;
-import ru.yandex.practicum.filmorate.exception.GenreNotFoundException;
-import ru.yandex.practicum.filmorate.exception.RatingMPANotFoundException;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
+import ru.yandex.practicum.filmorate.exception.*;
 import ru.yandex.practicum.filmorate.model.*;
 import ru.yandex.practicum.filmorate.storage.*;
 
@@ -37,21 +34,21 @@ public class FilmService {
 
     public Film update(Film film) {
         if (!filmStorage.isFindFilmById(film.getId())) {
-            return null;
+            throw new FilmNotFoundException("Не найден обьект для обновления");
         }
         return filmStorage.update(film).get();
     }
 
     public boolean delete(Film film) {
         if (!filmStorage.isFindFilmById(film.getId())) {
-            return false;
+            throw new FilmNotFoundException("Не найден обьект для обновления");
         }
         return filmStorage.delete(film);
     }
 
     public boolean deleteFilmById(long filmId) {
         if (!filmStorage.isFindFilmById(filmId)) {
-            return false;
+            throw new FilmNotFoundException("Не найден обьект для обновления");
         }
         return filmStorage.deleteFilmById(filmId);
     }
@@ -128,6 +125,9 @@ public class FilmService {
     }
 
     public List<Genre> findGenres() {
+        if (filmStorage.findGenres().isEmpty()) {
+            throw new GenreNotFoundException("Отсуствуют жанры");
+        }
         return filmStorage.findGenres();
     }
 
@@ -140,6 +140,9 @@ public class FilmService {
     }
 
     public List<RatingMPA> findRatingMPAs() {
+        if (filmStorage.findRatingMPAs().isEmpty()) {
+            throw new RatingMPANotFoundException("Не найден рейтинг");
+        }
         return filmStorage.findRatingMPAs();
     }
 
@@ -176,7 +179,7 @@ public class FilmService {
 
     public boolean deleteDirectorById(Long directorId) {
         if (!filmStorage.isFindDirectorById(directorId)) {
-            return false;
+            throw new DirectorNotFoundException("Не найден режиссер");
         }
         return filmStorage.deleteDirectorById(directorId);
     }
