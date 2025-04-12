@@ -25,11 +25,10 @@ public class FilmService {
         if (mpaStorage.getById(film.getMpa().getId()) == null) {
             throw new NotFoundException("Указанный MPA  не найден");
         }
-        if (film.getGenres() == null) {
-            throw new NotFoundException("Указанный жанр не найден");
-        }
         if (film.getGenres() != null) {
             genreStorage.checkGenresExists(film.getGenres());
+        } else {
+            throw new NotFoundException("Жанр не найден");
         }
         log.info("Фильм {} создан", film);
         return filmStorage.createFilm(film);
