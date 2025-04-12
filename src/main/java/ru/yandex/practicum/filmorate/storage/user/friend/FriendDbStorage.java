@@ -11,7 +11,7 @@ import java.util.Set;
 
 @Component
 @AllArgsConstructor
-public class FriendDbStorage implements FriendStorage{
+public class FriendDbStorage implements FriendStorage {
     private final JdbcTemplate jdbcTemplate;
 
 
