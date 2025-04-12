@@ -2,7 +2,7 @@ package ru.yandex.practicum.filmorate.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exception.NotFoundException;
+import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.storage.genre.GenreStorage;
 
@@ -19,7 +19,7 @@ public class GenreService {
 
     public Genre getById(Long id) {
         if (storage.getById(id) == null) {
-            throw new NotFoundException("Жанра с таким id = " + id + " нет");
+            throw new ValidationException("Жанра с таким id = " + id + " нет");
         } else {
             return storage.getById(id);
         }
