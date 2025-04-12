@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @AllArgsConstructor
 @Component
-public class FilmDbStorage implements FilmStorage{
+public class FilmDbStorage implements FilmStorage {
     private final JdbcTemplate jdbcTemplate;
 
 
@@ -83,8 +83,8 @@ public class FilmDbStorage implements FilmStorage{
         "on fg.genre_id = g.id " +
         "group by f.id";
 
-        return jdbcTemplate.query(sql, new FilmMapper()).
-                stream().collect(Collectors.toMap(Film::getId, Function.identity()));
+        return jdbcTemplate.query(sql, new FilmMapper()).stream()
+            .collect(Collectors.toMap(Film::getId, Function.identity()));
     }
 
     //update
