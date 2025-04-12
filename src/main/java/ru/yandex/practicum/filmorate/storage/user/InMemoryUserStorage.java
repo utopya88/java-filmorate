@@ -80,7 +80,7 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     private static void validateEmail(String email) {
-        if ((!email.contains("@")) || email.isBlank() ) {
+        if ((!email.contains("@")) || email.isBlank()) {
             throw new ValidationException("Ошибка валидации. Неверный email формат.");
         }
     }
