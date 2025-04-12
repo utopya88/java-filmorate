@@ -31,10 +31,8 @@ public class UserValidator {
     }
 
     public void validateUserLogin(User user) {
-        if (user.getLogin().contains(" ")) {
-            RuntimeException exception = new ValidationException("User's login shouldn't contain spaces.");
-            log.warn(exception.getMessage());
-            throw exception;
+        if (user.getLogin().contains(" ") || user.getLogin().isBlank() || user.getLogin().isEmpty()) {
+            throw new ValidationException("Ошибка валидации. Логин не может быть пустым или с пробелами");
         }
 
         if (user.getName() == null || user.getName().isEmpty() || user.getName().isBlank()) {
