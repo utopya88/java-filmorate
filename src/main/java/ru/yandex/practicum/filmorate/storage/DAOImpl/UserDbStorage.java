@@ -1,8 +1,9 @@
-package ru.yandex.practicum.filmorate.storage.user;
+package ru.yandex.practicum.filmorate.storage.DAOImpl;
 
-import ru.yandex.practicum.filmorate.exception.FindObjectException;
+import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
+import ru.yandex.practicum.filmorate.model.Event;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.user.UserStorage;
+import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.sql.Date;
 import java.sql.PreparedStatement;
@@ -18,7 +19,9 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
+import org.springframework.stereotype.Repository;
 
+@Repository
 @Primary
 @RequiredArgsConstructor
 @Slf4j
@@ -26,9 +29,8 @@ public class UserDbStorage implements UserStorage {
 
     private final JdbcTemplate jdbcTemplate;
 
-    @Override
     public Optional<User> create(User user) {
-        String sqlQuery = "INSERT INTO users(user_name, email, login, birthday) VALUES (?, ?, ?, ?)";
+        String sqlQuery = "insert into users(user_name, email, login, birthday) values (?, ?, ?, ?)";
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
         jdbcTemplate.update(connection -> {
@@ -40,80 +42,75 @@ public class UserDbStorage implements UserStorage {
             return stmt;
         }, keyHolder);
 
-        user.setId(keyHolder.getKey().intValue());
+        user.setId(keyHolder.getKey().longValue());
         return Optional.of(user);
     }
 
-    @Override
     public Optional<User> update(User user) {
-        String sqlQuery = "UPDATE users SET user_name = ?, email = ?, login = ?, birthday = ?" +
-                " WHERE user_id = ?";
+        String sqlQuery = "update users set user_name = ?, email = ?, login = ?, birthday = ?" +
+                " where user_id = ?";
         jdbcTemplate.update(sqlQuery, user.getName(), user.getEmail(), user.getLogin(),
                 user.getBirthday(), user.getId());
         return Optional.of(user);
     }
 
     public boolean delete(User user) {
-        String sqlQuery = "DELETE FROM users WHERE user_id = ?";
+        String sqlQuery = "delete from users where user_id = ?";
         return jdbcTemplate.update(sqlQuery, user.getId()) > 0;
     }
 
-    public boolean deleteUserById(Integer userId) {
-        String sqlQuery = "DELETE FROM users WHERE user_id = ?";
+    public boolean deleteUserById(long userId) {
+        String sqlQuery = "delete from users where user_id = ?";
         return jdbcTemplate.update(sqlQuery, userId) > 0;
     }
 
-    @Override
-    public List<User> findAll() {
-        String sqlQuery = "SELECT * FROM users";
+    public List<User> findUsers() {
+        String sqlQuery = "select * from users";
         return jdbcTemplate.query(sqlQuery, this::makeUser);
     }
 
-    @Override
-    public Optional<User> getUserById(Integer userId) {
+    public Optional<User> findUserById(long userId) {
         String sqlQuery = "select * from users where user_id = ?";
         try {
             return Optional.of(jdbcTemplate.queryForObject(sqlQuery, this::makeUser, userId));
         } catch (EmptyResultDataAccessException e) {
             log.warn("Пользователь № {} не найден", userId);
-            throw new FindObjectException(String.format("Пользователь c идентификатором № %d не найден", userId));
+            throw new UserNotFoundException(String.format("Пользователь № %d не найден", userId));
         }
     }
 
-    @Override
-    public boolean isFindUserById(Integer userId) {
+    public boolean isFindUserById(long userId) {
         String sqlQuery = "select exists(select 1 from users where user_id = ?)";
         if (jdbcTemplate.queryForObject(sqlQuery, Boolean.class, userId)) {
             return true;
         }
-        log.warn("Пользователь с идентификатором № {} не найден", userId);
-        throw new FindObjectException(String.format("Пользователь с идентификатором № %d не найден", userId));
+        log.warn("Пользователь № {} не найден", userId);
+        throw new UserNotFoundException(String.format("Пользователь № %d не найден", userId));
+    }
+
+    @Override
+    public List<Event> getUserEvent(Integer id) {
+        String sqlQuery = "SELECT * FROM feeds WHERE user_id = ?";
+        return jdbcTemplate.query(sqlQuery, this::makeEvent, id);
     }
 
     private User makeUser(ResultSet rs, int rowNum) throws SQLException {
         User user = new User(rs.getString("email"), rs.getString("login"),
                 rs.getDate("birthday").toLocalDate());
-        user.setId(rs.getInt("user_id"));
+        user.setId(rs.getLong("user_id"));
         user.setName(rs.getString("user_name"));
         return user;
     }
 
-    public boolean addInFriends(User friendRequest, User friendResponse) {
-        String sqlQuery = "merge into friends(request_friend_id,response_friend_id) values (?, ?)";
-        return jdbcTemplate.update(sqlQuery, friendRequest.getId(), friendResponse.getId()) > 0;
-    }
-
-    public boolean deleteFromFriends(User friendRequest, User friendResponse) {
-        String sqlQuery = "delete from friends " +
-                "where request_friend_id = ? " +
-                "and response_friend_id = ?;";
-        return jdbcTemplate.update(sqlQuery, friendRequest.getId(), friendResponse.getId()) > 0;
-    }
-
-    public List<Integer> findFriends(Integer id) {
-        String sqlQuery = "select response_friend_id from friends " +
-                "where request_friend_id = ?";
-        return jdbcTemplate.query(sqlQuery, (rs, rowNum) -> rs.getInt("response_friend_id"), id);
+    private Event makeEvent(ResultSet rs, int rowNum) throws SQLException {
+        return Event.builder()
+                .timestamp(rs.getLong("timestamp"))
+                .userId(rs.getLong("user_id"))
+                .eventType(rs.getString("event_type"))
+                .operation(rs.getString("operation"))
+                .eventId(rs.getLong("event_id"))
+                .entityId(rs.getLong("entity_id"))
+                .build();
     }
 
 }
