@@ -27,8 +27,6 @@ public class FilmService {
         }
         if (film.getGenres() != null) {
             genreStorage.checkGenresExists(film.getGenres());
-        } else {
-            throw new NotFoundException("Жанр не найден");
         }
         log.info("Фильм {} создан", film);
         return filmStorage.createFilm(film);
