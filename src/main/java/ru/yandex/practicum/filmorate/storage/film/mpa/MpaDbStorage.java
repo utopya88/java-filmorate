@@ -24,12 +24,13 @@ public class MpaDbStorage implements MpaStorage {
 
         return jdbcTemplate.queryForObject(sql, new MpaMapper(), id);
     }
+
     @Override
     public Map<Integer, Mpa> getMpas() {
         String sql = "select * " +
                 "from mpa";
 
-        return jdbcTemplate.query(sql, new MpaMapper()).
-                stream().collect(Collectors.toMap(Mpa::getId, Function.identity()));
+        return jdbcTemplate.query(sql, new MpaMapper()).stream()
+            .collect(Collectors.toMap(Mpa::getId, Function.identity()));
     }
 }
