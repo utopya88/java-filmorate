@@ -133,16 +133,16 @@ public class FilmDbStorage implements FilmStorage {
         long duration = film.getDuration();
         if (name == null || name.isEmpty()) {
             log.info("Название фильма пустое");
-            throw new ValidationException();
+            throw new ValidationException("Название фильма пустое");
         } else if (description.length() > 200) {
             log.info("Описание фильма {} больше 200 символов", name);
-            throw new ValidationException();
+            throw new ValidationException("Описание фильма {} больше 200 символов");
         } else if (releaseDate.isBefore(LocalDate.of(1895, 12, 28))) {
             log.info("Дата релиза фильма {} раньше 28 декабря 1895 года", name);
-            throw new ValidationException();
+            throw new ValidationException("Дата релиза фильма {} раньше 28 декабря 1895 года");
         } else if (duration < 0) {
             log.info("Продолжительность фильма {} отрицательная", name);
-            throw new ValidationException();
+            throw new ValidationException("Продолжительность фильма {} отрицательная");
         }
     }
 
