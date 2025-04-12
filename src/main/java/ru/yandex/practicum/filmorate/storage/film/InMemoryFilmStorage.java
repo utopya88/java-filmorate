@@ -3,6 +3,7 @@ package ru.yandex.practicum.filmorate.storage.film;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.film.*;
+import ru.yandex.practicum.filmorate.validation.ValidationController;
 
 import java.util.*;
 
@@ -16,11 +17,13 @@ public class InMemoryFilmStorage implements FilmStorage {
     //create
     @Override
     public Film addFilm(Film film) {
-        film.setId(++id);
-        updateMpa(film);
-        updateGenres(film);
-        films.put(id, film);
-        log.info("Film \"" + film.getName() + "\" was added.");
+        if (ValidationController.validateFilm(film)) {
+            film.setId(++id);
+            updateMpa(film);
+            updateGenres(film);
+            films.put(id, film);
+            log.info("Film \"" + film.getName() + "\" was added.");
+        }
         return film;
     }
 
