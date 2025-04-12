@@ -1,30 +1,40 @@
 package ru.yandex.practicum.filmorate.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import lombok.*;
-import org.springframework.validation.annotation.Validated;
-import ru.yandex.practicum.filmorate.validation.AfterDate;
+import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.time.LocalDate;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 @Data
-@Validated
-@EqualsAndHashCode
-@Builder(toBuilder = true)
-@RequiredArgsConstructor
-@AllArgsConstructor
+@EqualsAndHashCode(of = {"email"})
+@AllArgsConstructor(staticName = "of")
 public class User {
     private Long id;
-    @Email
-    @NotBlank(message = "Почта не может быть пустая")
-    private String email;
-    @NotBlank(message = "Login не должен быть пустым")
-    private String login;
     private String name;
-    @AfterDate
+    @Email(message = "Invalid email")
+    @NotBlank(message = "Email cannot be empty")
+    private String email;
+    @NotNull(message = "Login cannot be null")
+    @NotBlank(message = "Login cannot be empty or contain spaces")
+    private String login;
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    @NotNull(message = "Birthday cannot be null")
     private LocalDate birthday;
-    private List<Long> friends;
-}
 
+    private Set<Long> friends;
+
+    public Set<Long> getFriends() {
+        return friends == null ? new HashSet<>() : friends; // Защита от null
+    }
+
+    public void setFriends(Set<Long> friends) {
+        this.friends = friends == null ? new HashSet<>() : friends; // Защита от null
+    }
+}

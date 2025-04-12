@@ -1,34 +1,34 @@
 package ru.yandex.practicum.filmorate.model;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
-import lombok.*;
-import org.springframework.validation.annotation.Validated;
-import ru.yandex.practicum.filmorate.validation.BeforeDate;
 
 import java.time.LocalDate;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
-@Data
-@Validated
-@EqualsAndHashCode
-@Builder(toBuilder = true)
-@NoArgsConstructor
-@RequiredArgsConstructor
-@AllArgsConstructor
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@Setter
 public class Film {
     private Long id;
-    @NotBlank(message = "Название не может быть пустым")
+
+    @NotBlank(message = "Название фильма не может быть пустым")
     private String name;
-    @Size(max = 200)
+
+    @Size(max = 200, message = "Описание фильма не может превышать 200 символов")
     private String description;
-    @BeforeDate
+
+    @NotNull(message = "Дата релиза фильма не может быть null")
     private LocalDate releaseDate;
-    @Positive
-    private Integer duration;
-    private List<Long> likes;
-    private List<Genre> genres;
-    @NonNull
-    private Mpa mpa;
+
+    @NotNull(message = "Продолжительность фильма должна быть указана")
+    @Positive(message = "Film duration must be a positive number")
+    private int duration;
+
+    private Set<Long> likedUsers = new HashSet<>();
 }
