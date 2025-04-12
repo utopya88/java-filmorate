@@ -8,7 +8,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Component
-public class InMemoryGenreStorage implements GenreStorage{
+public class InMemoryGenreStorage implements GenreStorage {
     @Override
     public Genre getGenre(int id) {
         GenreInMemory genre = GenreInMemory.forValues(id);

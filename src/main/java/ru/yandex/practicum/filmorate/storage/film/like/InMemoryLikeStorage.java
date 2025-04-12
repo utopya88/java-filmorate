@@ -9,7 +9,7 @@ import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 @Component
-public class InMemoryLikeStorage implements LikeStorage{
+public class InMemoryLikeStorage implements LikeStorage {
     private final InMemoryFilmStorage filmStorage;
 
 

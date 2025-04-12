@@ -13,7 +13,7 @@ import java.util.Set;
 @Slf4j
 @AllArgsConstructor
 @Component
-public class LikeDbStorage implements LikeStorage{
+public class LikeDbStorage implements LikeStorage {
     private final JdbcTemplate jdbcTemplate;
 
 
