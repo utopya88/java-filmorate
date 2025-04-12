@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @AllArgsConstructor
 @Component
-public class UserDbStorage implements UserStorage{
+public class UserDbStorage implements UserStorage {
     private JdbcTemplate jdbcTemplate;
 
 
@@ -60,8 +60,8 @@ public class UserDbStorage implements UserStorage{
         String sql = "select * " +
                 "from \"USER\"";
 
-        return jdbcTemplate.query(sql, new UserMapper()).
-                stream().collect(Collectors.toMap(User::getId, Function.identity()));
+        return jdbcTemplate.query(sql, new UserMapper()).stream()
+            .collect(Collectors.toMap(User::getId, Function.identity()));
     }
 
     //update
