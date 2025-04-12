@@ -8,7 +8,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Component
-public class InMemoryMpaStorage implements MpaStorage{
+public class InMemoryMpaStorage implements MpaStorage {
     @Override
     public Mpa getMpa(int id) {
         MpaInMemory mpa = MpaInMemory.forValues(id);
