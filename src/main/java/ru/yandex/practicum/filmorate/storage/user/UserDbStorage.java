@@ -111,13 +111,13 @@ public class UserDbStorage implements UserStorage {
         LocalDate birthday = user.getBirthday();
         if (email == null || email.isEmpty() || !email.contains("@")) {
             log.info("Электронная почта не указана или не указан символ '@'");
-            throw new ValidationException();
+            throw new ValidationException("Электронная почта не указана или не указан символ '@'");
         } else if (login == null || login.isEmpty() || login.contains(" ")) {
             log.info("Логин пользователя с электронной почтой {} не указан или содержит пробел", email);
-            throw new ValidationException();
+            throw new ValidationException("Логин пользователя с электронной почтой {} не указан или содержит пробел");
         } else if (birthday.isAfter(LocalDate.now())) {
             log.info("Дата рождения пользователя с логином {} указана будущим числом", login);
-            throw new ValidationException();
+            throw new ValidationException("Дата рождения пользователя с логином {} указана будущим числом");
         }
     }
 
