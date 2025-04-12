@@ -70,7 +70,7 @@ public class InMemoryFilmStorage implements FilmStorage {
         String description = film.getDescription();
         LocalDate releaseDate = film.getReleaseDate();
         long duration = film.getDuration();
-        if (name == null || name.isEmpty()) {
+        if (name.isEmpty() || name.isBlank()) {
             log.debug("Название фильма пустое");
             throw new ValidationException("Название фильма пустое");
         } else if (description.length() > 200) {
