@@ -1,119 +1,79 @@
 package ru.yandex.practicum.filmorate.controller;
 
+import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import ru.yandex.practicum.filmorate.model.Review;
 import ru.yandex.practicum.filmorate.service.ReviewService;
 
 import javax.validation.Valid;
 import java.util.List;
-
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.*;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/reviews")
-@Slf4j
 @RequiredArgsConstructor
 public class ReviewController {
     private final ReviewService reviewService;
 
     @PostMapping
-    /**
-     * добавление нового отзыва
-     */
     public Review create(@Valid @RequestBody Review review) {
-        Review newReview = reviewService.create(review);
-        log.debug("Добавлен новый отзыв: {}", newReview);
-        return newReview;
+        return reviewService.save(review);
     }
 
     @PutMapping
-    /**
-     * обновление отзыва
-     */
     public Review update(@Valid @RequestBody Review review) {
-        Review newReview = reviewService.update(review);
-        log.debug("Обновлен отзыв: {}", newReview);
-        return newReview;
+        return reviewService.update(review);
     }
 
-    @DeleteMapping("/{reviewId}")
-    /**
-     * удаление отзыва
-     */
-    public void delete(@PathVariable Long reviewId) {
-        reviewService.delete(reviewId);
-        log.debug("Удалён отзыв с ID: {}", reviewId);
+    @DeleteMapping("/{id}")
+    public void delete(@PathVariable long id) {
+        reviewService.delete(id);
     }
 
-    @GetMapping("/{reviewId}")
-    /**
-     * получение отзыва по id
-     */
-    public Review findReviewById(@PathVariable Long reviewId) {
-        Review review = reviewService.findReviewById(reviewId);
-        log.debug("Получен отзыв с id = {}", reviewId);
-        return review;
+    @GetMapping("{id}")
+    public Review getReview(@PathVariable long id) {
+        return reviewService.getReviewById(id);
     }
 
     @GetMapping
-    /**
-     * получение списка отзывов
-     */
-    public List<Review> findReviews(@RequestParam(required = false) Long filmId,
-                                    @RequestParam(defaultValue = "10", required = false) Integer count) {
-        List<Review> reviews = reviewService.findReviews(filmId, count);
-        log.debug("Получен список отзывов, " +
-                "количество = {}", reviews.size());
-        return reviews;
+    public List<Review> getAllReviewsByParam(@RequestParam Optional<Long> filmId,
+                                             @RequestParam(defaultValue = "10") long count) {
+        return reviewService.getAllReviewsByParam(filmId, count);
     }
 
-    @PutMapping("/{reviewId}/like/{userId}")
-    /**
-     * пользователь лайкнул отзыв
-     */
-    public boolean addLike(@PathVariable Long reviewId, @PathVariable Long userId) {
-        if (reviewService.increaseUseful(reviewId, userId)) {
-            log.debug("Пользователь id = {} лайкнул отзыв id = {}", userId, reviewId);
-            return true;
-        }
-        return false;
+    @PutMapping("{id}/like/{userId}")
+    public void putLikeToReview(@PathVariable long id,
+                                @PathVariable long userId) {
+        long like = 1;
+        reviewService.putLikeOrDislikeToReview(id, userId, like);
     }
 
-    @PutMapping("/{reviewId}/dislike/{userId}")
-    /**
-     * пользователь дизлайкнул отзыв
-     */
-    public boolean addDislike(@PathVariable Long reviewId, @PathVariable Long userId) {
-        if (reviewService.decreaseUseful(reviewId, userId)) {
-            log.debug("Пользователь id = {} дизлайкнул отзыв id = {}", userId, reviewId);
-            return true;
-        }
-        return false;
+    @PutMapping("{id}/dislike/{userId}")
+    public void putDislikeToReview(@PathVariable long id,
+                                   @PathVariable long userId) {
+        long dislike = -1;
+        reviewService.putLikeOrDislikeToReview(id, userId, dislike);
     }
 
-    @DeleteMapping("/{reviewId}/like/{userId}")
-    /**
-     * пользователь удалил лайк на отзыв
-     */
-    public boolean deleteLike(@PathVariable Long reviewId, @PathVariable Long userId) {
-        if (reviewService.decreaseUseful(reviewId, userId)) {
-            log.debug("Пользователь id = {} удалил лайк на отзыв id = {}", userId, reviewId);
-            return true;
-        }
-        return false;
+    @DeleteMapping("{id}/like/{userId}")
+    public void deleteLikeToReview(@PathVariable long id,
+                                   @PathVariable long userId) {
+        long like = 1;
+        reviewService.deleteLikeOrDislikeToReview(id, userId, like);
     }
 
-    @DeleteMapping("/{reviewId}/dislike/{userId}")
-    /**
-     * пользователь удалил дизлайк на отзыв
-     */
-    public boolean deleteDislike(@PathVariable Long reviewId, @PathVariable Long userId) {
-        if (reviewService.increaseUseful(reviewId, userId)) {
-            log.debug("Пользователь id = {} удалил дизлайк на отзыв id = {}", userId, reviewId);
-            return true;
-        }
-        return false;
+    @DeleteMapping("{id}/dislike/{userId}")
+    public void deleteDislikeToReview(@PathVariable long id,
+                                      @PathVariable long userId) {
+        long dislike = -1;
+        reviewService.deleteLikeOrDislikeToReview(id, userId, dislike);
     }
-
 }

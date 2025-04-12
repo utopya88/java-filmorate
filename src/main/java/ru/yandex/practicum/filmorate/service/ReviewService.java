@@ -1,89 +1,76 @@
 package ru.yandex.practicum.filmorate.service;
 
-import ru.yandex.practicum.filmorate.exception.ValidationException;
-import ru.yandex.practicum.filmorate.model.Review;
-import ru.yandex.practicum.filmorate.storage.EventStorage;
-import ru.yandex.practicum.filmorate.storage.FilmStorage;
-import ru.yandex.practicum.filmorate.storage.ReviewStorage;
-import ru.yandex.practicum.filmorate.storage.UserStorage;
-
-import java.util.List;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
+import ru.yandex.practicum.filmorate.model.Review;
+import ru.yandex.practicum.filmorate.storage.review.ReviewStorage;
 
-@Service
+import java.util.List;
+import java.util.Optional;
+
+import static ru.yandex.practicum.filmorate.model.enums.EventType.REVIEW;
+import static ru.yandex.practicum.filmorate.model.enums.Operation.ADD;
+import static ru.yandex.practicum.filmorate.model.enums.Operation.REMOVE;
+import static ru.yandex.practicum.filmorate.model.enums.Operation.UPDATE;
+
 @Slf4j
+@Service
 @RequiredArgsConstructor
 public class ReviewService {
 
-    @Qualifier("filmDbStorage")
-    private final FilmStorage filmStorage;
-    @Qualifier("userDbStorage")
-    private final UserStorage userStorage;
-    @Qualifier("reviewDbStorage")
     private final ReviewStorage reviewStorage;
-    @Qualifier("eventDbStorage")
-    private final EventStorage eventStorage;
+    private final FeedService feedService;
 
-    public Review create(Review review) {
-        if (!filmStorage.isFindFilmById(review.getFilmId()) || !userStorage.isFindUserById(review.getUserId())) {
-            return null;
+
+    public Review save(Review review) {
+        if (review != null && review.getUserId() <= 0L) {
+            throw new NotFoundException("К сожалению, Пользователь с таким id не может существовать");
         }
-        reviewStorage.create(review);
-        eventStorage.createEvent(review.getUserId(), "REVIEW", "ADD", review.getReviewId());
-        return review;
+        if (review != null && review.getFilmId() <= 0L) {
+            throw new NotFoundException("К сожалению, Фильм с таким id не может существовать");
+        }
+        Review rew = reviewStorage.save(review);
+        feedService.addFeed(rew.getReviewId(), rew.getUserId(), REVIEW, ADD);
+        return rew;
     }
 
     public Review update(Review review) {
-        if (!reviewStorage.isFindReviewById(review.getReviewId())) {
-            return null;
-        }
-        long reviewAuthorId = findReviewById(review.getReviewId()).getUserId();
-        eventStorage.createEvent(reviewAuthorId, "REVIEW", "UPDATE", review.getReviewId());
-        return reviewStorage.update(review).get();
+        Review rew = reviewStorage.getReviewById(review.getReviewId())
+                .orElseThrow(() -> new NotFoundException("Отзыв не найден"));
+
+        reviewStorage.update(review);
+        feedService.addFeed(rew.getReviewId(), rew.getUserId(), REVIEW, UPDATE);
+        return getReviewById(review.getReviewId());
     }
 
-    public boolean delete(Long reviewId) {
-        if (!reviewStorage.isFindReviewById(reviewId)) {
-            return false;
-        }
-        eventStorage.createEvent(findReviewById(reviewId).getUserId(), "REVIEW", "REMOVE", findReviewById(reviewId).getReviewId());
-        return reviewStorage.delete(reviewId);
+    public boolean delete(long id) {
+        Review rew = reviewStorage.getReviewById(id)
+                .orElseThrow(() -> new NotFoundException("Отзыв не найден"));
+
+        boolean isDeleted = reviewStorage.delete(id);
+        feedService.addFeed(rew.getReviewId(), rew.getUserId(), REVIEW, REMOVE);
+
+        return isDeleted;
     }
 
-    public Review findReviewById(Long reviewId) {
-        return reviewStorage.findReviewById(reviewId).get();
+    public Review getReviewById(long id) {
+        return reviewStorage.getReviewById(id).orElseThrow(() -> new NotFoundException("Отзыв не найден!"));
     }
 
-    public List<Review> findReviews(Long filmId, Integer count) {
-        if (count < 0) {
-            String message = "Параметр count не может быть отрицательным!";
-            log.warn(message);
-            throw new ValidationException(message, 20001);
-        }
-        if (filmId != null && !filmStorage.isFindFilmById(filmId)) {
-            return null;
-        }
-        return reviewStorage.findReviews(filmId, count);
+    public List<Review> getAllReviewsByParam(Optional<Long> filmId, long count) {
+        if (filmId.isPresent()) {
+            return reviewStorage.getReviewsByFilmId(filmId.get(), count);
+        } else
+            return reviewStorage.getAllReviewsByParam(count);
     }
 
-    public boolean increaseUseful(Long reviewId, Long userId) {
-        if (!reviewStorage.isFindReviewById(reviewId) || !userStorage.isFindUserById(userId)) {
-            return false;
-        }
-        reviewStorage.increaseUseful(reviewId);
-        return true;
+    public void putLikeOrDislikeToReview(long id, long userId, long vote) {
+        reviewStorage.putLikeOrDislikeToReview(id, userId, vote);
     }
 
-    public boolean decreaseUseful(Long reviewId, Long userId) {
-        if (!reviewStorage.isFindReviewById(reviewId) || !userStorage.isFindUserById(userId)) {
-            return false;
-        }
-        reviewStorage.decreaseUseful(reviewId);
-        return true;
+    public void deleteLikeOrDislikeToReview(long id, long userId, long vote) {
+        reviewStorage.deleteLikeOrDislikeToReview(id, userId, vote);
     }
-
 }

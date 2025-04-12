@@ -1,26 +1,24 @@
 package ru.yandex.practicum.filmorate.model;
 
 import lombok.Builder;
-import lombok.Data;
-import lombok.NonNull;
+import lombok.Getter;
+import lombok.Setter;
 
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.Size;
+import javax.validation.constraints.NotNull;
 
-@Data
+@Getter
+@Setter
 @Builder
 public class Review {
-
     private Long reviewId;
-    @NotBlank(message = "Описание не может быть пустым.")
-    @Size(max = 1000, message = "Описание не может быть больше 1000 символов.")
+    @NotBlank
     private String content;
-    @NonNull
+    @NotNull
     private Boolean isPositive;
-    @NonNull
+    @NotNull
     private Long userId;
-    @NonNull
+    @NotNull
     private Long filmId;
-    private Integer useful;
-
+    private Long useful;
 }

@@ -1,193 +1,89 @@
 package ru.yandex.practicum.filmorate.controller;
 
-import ru.yandex.practicum.filmorate.model.Director;
-import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.Genre;
-import ru.yandex.practicum.filmorate.model.RatingMPA;
-import ru.yandex.practicum.filmorate.service.FilmService;
-import ru.yandex.practicum.filmorate.util.ValidatorControllers;
-
-import java.util.List;
-import javax.validation.Valid;
-
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.service.FilmService;
+
+import javax.validation.Valid;
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
 
 @RestController
-@RequestMapping
-@Slf4j
-@Validated
+@RequestMapping("/films")
 @RequiredArgsConstructor
 public class FilmController {
 
     private final FilmService filmService;
 
-    @PostMapping("/films")
-    @Validated
+    @GetMapping
+    public Collection<Film> findAll() {
+        return filmService.findAll();
+    }
+
+    @PostMapping
     public Film create(@Valid @RequestBody Film film) {
-        film = ValidatorControllers.validateFilm(film);
-        Film newFilm = filmService.create(film);
-        log.debug("Добавлен новый фильм: {}", newFilm);
-        return newFilm;
+        return filmService.save(film);
     }
 
-    @PutMapping("/films")
-    @Validated
-    public Film update(@Valid @RequestBody Film film) {
-        ValidatorControllers.validateFilm(film);
-        Film newFilm = filmService.update(film);
-        log.debug("Обновлен фильм: {}", newFilm);
-        return newFilm;
+    @PutMapping
+    public Film put(@Valid @RequestBody Film film) {
+        return filmService.update(film);
     }
 
-    @DeleteMapping("/films")
-    @Validated
-    public void delete(@Valid @RequestBody Film film) {
-        filmService.delete(film);
-        log.debug("Удалён фильм: {}", film);
+    @GetMapping("{id}")
+    public Film getById(@PathVariable long id) {
+        return filmService.getFilmFromStorage(id);
     }
 
-    @DeleteMapping("/films/{filmId}")
-    @Validated
-    public void deleteFilmById(@Valid @PathVariable long filmId) {
-        filmService.deleteFilmById(filmId);
-        log.debug("Удалён фильм c id: {}", filmId);
+    @PutMapping("/{id}/like/{userId}")
+    public Film putLike(@PathVariable("id") long filmId,
+                        @PathVariable long userId) {
+        return filmService.putLike(filmId, userId);
     }
 
-    @GetMapping("/films")
-    public List<Film> findFilms() {
-        List<Film> films = filmService.findFilms();
-        log.debug("Получен список фильмов, количество = {}", films.size());
-        return films;
+    @DeleteMapping("/{id}/like/{userId}")
+    public Film deleteLike(@PathVariable("id") long filmId,
+                           @PathVariable long userId) {
+        return filmService.deleteLike(filmId, userId);
     }
 
-    @GetMapping("/films/{filmId}")
-    public Film findFilmById(@PathVariable long filmId) {
-        Film film = filmService.findFilmById(filmId);
-        log.debug("Получен фильм с id = {}", filmId);
-        return film;
+    @GetMapping("/popular")
+    public Collection<Film> getMostRatedFilms(@RequestParam(defaultValue = "10") long count,
+                                              @RequestParam Optional<Integer> genreId,
+                                              @RequestParam Optional<Integer> year) {
+        return filmService.getPopular(count, genreId, year);
     }
 
-    @PutMapping("/films/{id}/like/{userId}")
-    public boolean like(@PathVariable long id, @PathVariable long userId,
-                        @RequestParam(defaultValue = "6") Integer mark) {
-        if (filmService.like(id, userId, mark)) {
-            log.debug("Пользователь id = {} поставил оценку {} фильму id = {}", userId, mark, id);
-            return true;
-        }
-        return false;
+    @GetMapping("/director/{directorId}")
+    public List<Film> getByDirectorId(@PathVariable Integer directorId,
+                                      @RequestParam String sortBy) {
+        return filmService.getSortedDirectorsFilms(directorId, sortBy);
     }
 
-    @DeleteMapping("/films/{id}/like/{userId}")
-    public boolean dislike(@PathVariable long id, @PathVariable long userId) {
-        if (filmService.dislike(id, userId)) {
-            log.debug("Пользователь id = {} удалил оценку с фильма id = {}", userId, id);
-            return true;
-        }
-        return false;
+    @DeleteMapping("/{filmId}")
+    public void deleteById(@PathVariable long filmId) {
+        filmService.deleteById(filmId);
     }
 
-    @GetMapping("/films/popular")
-    public List<Film> findPopularFilms(@RequestParam(defaultValue = "10") int count,
-                                       @RequestParam(required = false) Long genreId,
-                                       @RequestParam(required = false) Integer year) {
-        List<Film> films = filmService.findPopularFilms(count, genreId, year);
-        log.debug("Получен список из первых {} фильмов по количеству оценок, " +
-                "количество = {}", count, films.size());
-        return films;
+    @GetMapping("/common")
+    public List<Film> getCommonFilms(@RequestParam long userId,
+                                     @RequestParam long friendId) {
+        return filmService.getCommonFilmsByRating(userId, friendId);
     }
 
-    @GetMapping("/genres")
-    public List<Genre> findGenres() {
-        List<Genre> genres = filmService.findGenres();
-        log.debug("Получен список жанров, количество = {}", genres.size());
-        return genres;
+    @GetMapping("/search")
+    public Collection<Film> getSearchResults(@RequestParam String query,
+                                             @RequestParam(defaultValue = "title") Optional<List<String>> by) {
+        return filmService.getSearchResults(query, by.get());
     }
-
-    @GetMapping("/genres/{id}")
-    public Genre findGenreById(@PathVariable long id) {
-        Genre genre = filmService.findGenreById(id);
-        log.debug("Получен жанр с id = {}", id);
-        return genre;
-    }
-
-    @GetMapping("/mpa")
-    public List<RatingMPA> findRatingMPAs() {
-        List<RatingMPA> ratingMPAs = filmService.findRatingMPAs();
-        log.debug("Получен список рейтингов МПА, количество = {}", ratingMPAs.size());
-        return ratingMPAs;
-    }
-
-    @GetMapping("/mpa/{id}")
-    public RatingMPA findRatingMPAById(@PathVariable long id) {
-        RatingMPA ratingMPA = filmService.findRatingMPAById(id);
-        log.debug("Получен рейтинг МПА с id = {}", id);
-        return ratingMPA;
-    }
-
-    @GetMapping("/directors")
-    public List<Director> findDirectors() {
-        List<Director> directors = filmService.findDirectors();
-        log.debug("Получен список режиссёров, количество = {}", directors.size());
-        return directors;
-    }
-
-    @GetMapping("/directors/{id}")
-    public Director findDirectorById(@PathVariable long id) {
-        Director director = filmService.findDirectorById(id);
-        log.debug("Получен режиссёр с id = {}", id);
-        return director;
-    }
-
-    @PostMapping("/directors")
-    public Director createDirector(@RequestBody Director director) {
-        director = ValidatorControllers.validateDirector(director);
-        Director newDirector = filmService.createDirector(director);
-        log.debug("Добавлен новый режиссёр: {}", newDirector);
-        return newDirector;
-    }
-
-    @PutMapping("/directors")
-    public Director update(@RequestBody Director director) {
-        director = ValidatorControllers.validateDirector(director);
-        Director newDirector = filmService.updateDirector(director);
-        log.debug("Обновлен режиссёр: {}", newDirector);
-        return newDirector;
-    }
-
-    @DeleteMapping("/directors/{id}")
-    public boolean deleteDirector(@PathVariable long id) {
-        if (filmService.deleteDirectorById(id)) {
-            log.debug("Удалён режиссёр с id = {}", id);
-            return true;
-        }
-        return false;
-    }
-
-    @GetMapping("/films/director/{directorId}")
-    public List<Film> findSortFilmsByDirector(@PathVariable long directorId, @RequestParam String sortBy) {
-        List<Film> films = filmService.findSortFilmsByDirector(directorId, sortBy);
-        log.debug("Получен отсортированный список фильмов по {}, " +
-                "количество = {}", sortBy, films.size());
-        return films;
-    }
-
-    @GetMapping("/films/search")
-    public List<Film> findSortFilmsBySubstring(@RequestParam String query, @RequestParam String by) {
-        List<Film> films = filmService.findSortFilmsBySubstring(query, by);
-        log.debug("Получен отсортированный список фильмов, который ищет подстроку {} в {}, " +
-                "количество = {}", query, by, films.size());
-        return films;
-    }
-
-    @GetMapping("/films/common")
-    public List<Film> findCommonSortFilms(@RequestParam long userId, @RequestParam long friendId) {
-        List<Film> films = filmService.findCommonSortFilms(userId, friendId);
-        log.debug("Получен список общих отсортированных фильмов " +
-                "у пользователей {} и {}.", userId, friendId);
-        return films;
-    }
-
 }
