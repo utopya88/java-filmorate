@@ -27,19 +27,14 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public User create(User user) {
-        validate(user);
-        String name = user.getName();
-        String login = user.getLogin();
-        if (name == null || name.isEmpty()) {
-            user.setName(login);
-            log.info("Для пользователя с логином {} установлено новое имя {}", login, user.getName());
+        if(validate(user)) {
+            user.setId(++this.id);
+            if (user.getFriends() == null) {
+                user.setFriends(new HashMap<>());
+            }
+            users.put(user.getId(), user);
+            log.info("Добавлен новый пользователь: {}", user);
         }
-        user.setId(++this.id);
-        if (user.getFriends() == null) {
-            user.setFriends(new HashMap<>());
-        }
-        users.put(user.getId(), user);
-        log.info("Добавлен новый пользователь: {}", user);
         return user;
     }
 
@@ -68,19 +63,47 @@ public class InMemoryUserStorage implements UserStorage {
         }
     }
 
-    private static void validate(User user) {
-        String login = user.getLogin();
-        LocalDate birthday = user.getBirthday();
-        if (user.getEmail().isEmpty() || user.getEmail().isBlank() || !user.getEmail().contains("@")) {
+    public static boolean validate(User user) {
+       validateEmail(user.getEmail());
+       validateLogin(user.getLogin());
+       user = validateUserName(user);
+       validateBirthday(user.getBirthday());
+       return true;
+    }
+
+
+    private static User validateUserName(User user) {
+        if (user.getName() == null || user.getName().isEmpty() || user.getName().isBlank()) {
+            user.setName(user.getLogin());
+        }
+        return user;
+    }
+
+    private static void validateEmail(String email) {
+        if (email.isEmpty() || email.isBlank() || !email.contains("@")) {
             throw new ValidationException("Ошибка валидации. Неверный email формат.");
-        } else if (user.getLogin() == null || user.getLogin().isEmpty() || user.getLogin().contains(" ")) {
-            log.info("Логин пользователя с электронной почтой {} не указан или содержит пробел", user.getEmail());
-            throw new ValidationException("Логин пользователя с электронной почтой {} не указан или содержит пробел");
-        } else if (birthday.isAfter(LocalDate.now())) {
-            log.info("Дата рождения пользователя с логином {} указана будущим числом", login);
-            throw new ValidationException("Дата рождения пользователя с логином {} указана будущим числом");
         }
     }
+
+    private static void validateLogin(String login) {
+        if (login.isEmpty() || login.isBlank() || login.contains(" ")) {
+            throw new ValidationException("Ошибка валидации. Логин не может быть пустым или с пробелами");
+        }
+    }
+
+    private static void validateBirthday(LocalDate birthday) {
+        if (birthday.isAfter(LocalDate.now())) {
+            throw new ValidationException("Ошибка валидации. Вы из будущего?)");
+        }
+    }
+
+
+
+
+
+
+
+
 
     @Override
     public List<User> addToFriends(Integer userId, Integer friendId) {
