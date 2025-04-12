@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 
 @AllArgsConstructor
 @Component
-public class GenreDbStorage implements GenreStorage{
+public class GenreDbStorage implements GenreStorage {
     private final JdbcTemplate jdbcTemplate;
 
 
@@ -30,7 +30,7 @@ public class GenreDbStorage implements GenreStorage{
         String sql = "select * " +
                 "from genre";
 
-        return jdbcTemplate.query(sql, new GenreMapper()).
-                stream().collect(Collectors.toMap(Genre::getId, Function.identity()));
+        return jdbcTemplate.query(sql, new GenreMapper()).stream()
+            .collect(Collectors.toMap(Genre::getId, Function.identity()));
     }
 }
