@@ -1,14 +1,38 @@
-MERGE INTO GENRE (GENRE_ID, NAME)
-    VALUES (1, 'Комедия'),
-    (2, 'Драма'),
-    (3, 'Мультфильм'),
-    (4, 'Триллер'),
-    (5, 'Документальный'),
-    (6, 'Боевик');
+delete from film_genre;
+delete from friend;
+delete from genre;
+delete from liked_film;
+delete from film;
+delete from mpa;
+delete from "USER";
 
-MERGE INTO MPA (MPA_ID, NAME)
-    VALUES (1, 'G'),
-    (2, 'PG'),
-    (3, 'PG-13'),
-    (4, 'R'),
-    (5, 'NC-17');
+alter table genre
+    alter column id
+        restart with 1;
+
+insert into genre (name)
+values ('Комедия'),
+       ('Драма'),
+       ('Мультфильм'),
+       ('Триллер'),
+       ('Документальный'),
+       ('Боевик');
+
+alter table mpa
+    alter column id
+        restart with 1;
+
+insert into mpa (name)
+values ('G'),
+       ('PG'),
+       ('PG-13'),
+       ('R'),
+       ('NC-17');
+
+alter table film
+    alter column id
+        restart with 1;
+
+alter table "USER"
+    alter column id
+        restart with 1;

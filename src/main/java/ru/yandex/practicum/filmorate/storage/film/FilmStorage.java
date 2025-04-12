@@ -1,37 +1,21 @@
 package ru.yandex.practicum.filmorate.storage.film;
 
-import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.model.film.Film;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
+import java.util.Map;
 
 public interface FilmStorage {
+    //create
+    Film addFilm(Film film);
 
-    Film save(Film film);
+    //read
+    Film getFilm(int id);
 
-    Optional<Film> findFilmById(long id);
+    Map<Integer, Film> getFilms();
 
-    Film update(Film film);
+    //update
+    Film updateFilm(Film film);
 
-    Collection<Film> findAll();
-
-    void putLike(long filmId, long userId);
-
-    boolean deleteUsersLike(Film film, User user);
-
-    Collection<Film> getPopular(long count, Optional<Integer> genreId, Optional<Integer> year);
-
-    void deleteById(long filmId);
-
-    List<Film> getCommonFilmsByRating(long userId, long friendId);
-
-    Collection<Film> getFilmRecommendation(long userWantsRecomId, long userWithCommonLikesId);
-
-    Collection<Film> getSearchResults(String query, List<String> by);
-
-    List<Film> getSortedDirectorsFilmsByYears(long id);
-
-    List<Film> getSortedDirectorsFilmsByLikes(long id);
+    //delete
+    void clearFilmStorage();
 }
