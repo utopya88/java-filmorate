@@ -20,8 +20,10 @@ public interface UserStorage {
     boolean deleteFriend(User user, User friend);
 
     Collection<User> getFriendsFromUser(long id);
+
     Collection<User> getCommonFriendsFromUser(long id, long otherId);
 
     void deleteById(long userId);
+
     long findUserWithCommonLikes(long userId);
 }
