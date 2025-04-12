@@ -1,75 +1,53 @@
 package ru.yandex.practicum.filmorate.service;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
-import ru.yandex.practicum.filmorate.storage.user.friend.FriendStorage;
 
-import java.util.*;
+import java.util.List;
 
 @Service
 public class UserService {
+
+    @Qualifier("userDbStorage")
     private final UserStorage userStorage;
-    private final FriendStorage friendStorage;
 
-
-    //inMemoryUserStorage / userDbStorage
-    //inMemoryFriendStorage / friendDbStorage
-    public UserService(@Qualifier("userDbStorage") UserStorage userStorage,
-                       @Qualifier("friendDbStorage") FriendStorage friendStorage) {
+    @Autowired
+    public UserService(@Qualifier("userDbStorage") UserStorage userStorage) {
         this.userStorage = userStorage;
-        this.friendStorage = friendStorage;
     }
 
-
-    //user
-    //create
-    public User addUser(User user) {
-        return userStorage.addUser(user);
+    public List<User> get() {
+        return userStorage.get();
     }
 
-    //read
-    public User getUser(int id) {
-        return userStorage.getUser(id);
+    public User create(User user) {
+        return userStorage.create(user);
     }
 
-    public Map<Integer, User> getUsers() {
-        return userStorage.getUsers();
+    public User update(User user) {
+        return userStorage.update(user);
     }
 
-    //update
-    public User updateUser(User user) {
-        return userStorage.updateUser(user);
+    public User getUserById(Integer userId) {
+        return userStorage.getUserById(userId);
     }
 
-    //delete
-    public void clearUserStorage() {
-        userStorage.clearUserStorage();
+    public List<User> addToFriends(Integer userId, Integer friendId) {
+        return userStorage.addToFriends(userId, friendId);
     }
 
-    //friends
-    //create
-    public void addFriend(int userId, int friendId) {
-        friendStorage.addFriend(userId, friendId);
+    public void deleteFromFriends(Integer userId, Integer friendId) {
+        userStorage.deleteFromFriends(userId, friendId);
     }
 
-    //read
-    public Set<User> getFriends(int userId) {
-        return friendStorage.getFriends(userId);
+    public List<User> getFriends(Integer userId) {
+        return userStorage.getFriends(userId);
     }
 
-    public Set<User> getConfirmedFriends(int userId) {
-        return friendStorage.getConfirmedFriends(userId);
-    }
-
-    public Set<User> getCommonFriends(int userId, int anotherUserId) {
-        return friendStorage.getCommonFriends(userId, anotherUserId);
-    }
-
-    //update
-    //delete
-    public void deleteFriend(int userId, int friendId) {
-        friendStorage.deleteFriend(userId, friendId);
+    public List<User> getCommonFriends(Integer userId, Integer friendId) {
+        return userStorage.getCommonFriends(userId, friendId);
     }
 }

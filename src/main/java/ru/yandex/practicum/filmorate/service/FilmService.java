@@ -1,72 +1,55 @@
 package ru.yandex.practicum.filmorate.service;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.model.film.Film;
+import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
-import ru.yandex.practicum.filmorate.storage.film.like.LikeStorage;
 
-import java.util.Map;
-import java.util.Set;
+import java.util.List;
 
 @Service
 public class FilmService {
+
+    @Qualifier("filmDbStorage")
     private final FilmStorage filmStorage;
-    private final LikeStorage likeStorage;
 
+    private final UserService userService;
 
-    //inMemoryFilmStorage / filmDbStorage
-    //inMemoryLikeStorage / likeDbStorage
-    public FilmService(@Qualifier("filmDbStorage") FilmStorage filmStorage,
-                       @Qualifier("likeDbStorage") LikeStorage likeStorage) {
+    @Autowired
+    public FilmService(@Qualifier("filmDbStorage") FilmStorage filmStorage, UserService userService) {
         this.filmStorage = filmStorage;
-        this.likeStorage = likeStorage;
+        this.userService = userService;
     }
 
-
-    //films
-    //create
-    public Film addFilm(Film film) {
-        return filmStorage.addFilm(film);
+    public List<Film> get() {
+        return filmStorage.get();
     }
 
-    //read
-    public Film getFilm(int id) {
-        return filmStorage.getFilm(id);
+    public Film create(Film film) {
+        return filmStorage.create(film);
     }
 
-    public Map<Integer, Film> getFilms() {
-        return filmStorage.getFilms();
+    public Film update(Film film) {
+        return filmStorage.update(film);
     }
 
-    //update
-    public Film updateFilm(Film film) {
-        return filmStorage.updateFilm(film);
+    public Film getFilmById(Integer filmId) {
+        return filmStorage.getFilmById(filmId);
     }
 
-    //delete
-    public void clearFilmStorage() {
-        filmStorage.clearFilmStorage();
+    public void addLike(Integer filmId, Integer userId) {
+        userService.getUserById(userId);
+        filmStorage.addLike(filmId, userId);
     }
 
-    //likes
-    //create
-    public void addLike(int filmId, int userId) {
-        likeStorage.addLike(filmId, userId);
+    public void deleteLike(Integer filmId, Integer userId) {
+        userService.getUserById(userId);
+        filmStorage.deleteLike(filmId, userId);
     }
 
-    //read
-    public Set<Integer> getLikedUsersIds(int filmId) {
-        return likeStorage.getLikedUsersIds(filmId);
-    }
-
-    public Set<Film> getPopularFilms(int count) {
-        return likeStorage.getPopularFilms(count);
-    }
-
-    //update
-    //delete
-    public void removeLike(int filmId, int userId) {
-        likeStorage.removeLike(filmId, userId);
+    public List<Film> getPopularFilms(Integer count) {
+        return filmStorage.getPopularFilms(count);
     }
 }

@@ -1,62 +1,34 @@
 package ru.yandex.practicum.filmorate.model;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import lombok.*;
+import lombok.Builder;
+import lombok.Data;
 
-import javax.validation.constraints.*;
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.Map;
 
 @Data
+@Builder
 public class User {
     private int id;
-    @NotNull @NotBlank @NotEmpty @Email
+    @Email
+    @NotNull
+    @NotBlank
     private String email;
-    @NotNull @NotBlank @NotEmpty
+    @NotNull
+    @NotBlank
     private String login;
     private String name;
-    @Past
-    @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate birthday;
-    @JsonIgnore
-    private Set<Integer> friendsIds = new HashSet<>();
-    @JsonIgnore
-    private Set<Integer> confirmedFriendsIds = new HashSet<>();
+    private Map<Integer, Boolean> friends; // список друзей со статусом
 
-
-    public User() {
+    public void addFriend(Integer friendId) {
+        this.friends.put(friendId, false);
     }
 
-    public User(String email, String login, String name, LocalDate birthday) {
-        this.email = email;
-        this.login = login;
-        this.name = name;
-        this.birthday = birthday;
-    }
-
-    public User(int id, String email, String login, String name, LocalDate birthday) {
-        this.id = id;
-        this.email = email;
-        this.login = login;
-        this.name = name;
-        this.birthday = birthday;
-    }
-
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        User user = (User) o;
-
-        return id == user.id;
-    }
-
-    @Override
-    public int hashCode() {
-        return id;
+    public void deleteFromFriends(Integer friendId) {
+        this.friends.remove(friendId);
     }
 }

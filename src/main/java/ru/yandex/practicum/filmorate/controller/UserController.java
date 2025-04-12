@@ -1,91 +1,59 @@
 package ru.yandex.practicum.filmorate.controller;
 
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
-import ru.yandex.practicum.filmorate.validation.UserValidator;
 
 import javax.validation.Valid;
-import java.util.Collection;
-import java.util.Set;
+import java.util.List;
 
-@Slf4j
-@AllArgsConstructor
+@RequiredArgsConstructor
 @RestController
-@RequestMapping("/users")
+@Slf4j
 public class UserController {
+
     private final UserService userService;
-    private final UserValidator userValidator;
 
-
-    //users
-    //create
-    @PostMapping
-    public User addUser(@Valid @RequestBody User user) {
-        userValidator.validateUserLogin(user);
-        return userService.addUser(user);
+    @GetMapping("/users")
+    @ResponseBody
+    public List<User> get() {
+        return userService.get();
     }
 
-    //read
-    @GetMapping("/{id}")
-    public User getUser(@PathVariable int id) {
-        userValidator.validateUserIds(id);
-        return userService.getUser(id);
+    @PostMapping(value = "/users")
+    public User create(@Valid @RequestBody User user) {
+        return userService.create(user);
     }
 
-    @GetMapping
-    public Collection<User> getUsers() {
-        return userService.getUsers().values();
+    @PutMapping(value = "/users")
+    public User update(@Valid @RequestBody User user) {
+        return userService.update(user);
     }
 
-    //update
-    @PutMapping
-    public User updateUser(@Valid @RequestBody User user) {
-        userValidator.validateUserIds(user.getId());
-        userValidator.validateUserLogin(user);
-        return userService.updateUser(user);
+    @GetMapping("/users/{id}")
+    public User getUserById(@PathVariable("id") Integer userId) {
+        return userService.getUserById(userId);
     }
 
-    //delete
-    @DeleteMapping
-    public void clearUserStorage() {
-        userService.clearUserStorage();
+    @PutMapping("/users/{id}/friends/{friendId}")
+    public List<User> addToFriends(@PathVariable("id") Integer userId, @PathVariable Integer friendId) {
+        return userService.addToFriends(userId, friendId);
     }
 
-    //friends
-    //create
-    @PutMapping("/{id}/friends/{friendId}")
-    public void addFriend(@PathVariable int id, @PathVariable int friendId) {
-        userValidator.validateUserIds(id, friendId);
-        userService.addFriend(id, friendId);
+    @DeleteMapping("/users/{id}/friends/{friendId}")
+    public void deleteFromFriends(@PathVariable("id") Integer userId, @PathVariable Integer friendId) {
+        userService.deleteFromFriends(userId, friendId);
     }
 
-    //read
-    @GetMapping("/{id}/friends")
-    public Set<User> getFriends(@PathVariable int id) {
-        userValidator.validateUserIds(id);
-        return userService.getFriends(id);
+    @GetMapping("/users/{id}/friends")
+    public List<User> getFriends(@PathVariable("id") Integer userId) {
+        return userService.getFriends(userId);
     }
 
-    @GetMapping("/{id}/friends/confirmed")
-    public Set<User> getConfirmedFriends(@PathVariable int id) {
-        userValidator.validateUserIds(id);
-        return userService.getConfirmedFriends(id);
-    }
-
-    @GetMapping("/{id}/friends/common/{otherId}")
-    public Set<User> getCommonFriends(@PathVariable int id, @PathVariable int otherId) {
-        userValidator.validateUserIds(id, otherId);
-        return userService.getCommonFriends(id, otherId);
-    }
-
-    //update
-    //delete
-    @DeleteMapping("/{id}/friends/{friendId}")
-    public void deleteFriend(@PathVariable int id, @PathVariable int friendId) {
-        userValidator.validateUserIds(id, friendId);
-        userService.deleteFriend(id, friendId);
+    @GetMapping("/users/{id}/friends/common/{otherId}")
+    public List<User> getCommonFriends(@PathVariable("id") Integer userId, @PathVariable("otherId") Integer friendId) {
+        return userService.getCommonFriends(userId, friendId);
     }
 }
