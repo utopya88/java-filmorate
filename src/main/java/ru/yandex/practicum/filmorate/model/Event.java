@@ -14,9 +14,9 @@ public class Event {
     private Long userId;
     @NonNull
     private Long timestamp;
-    private String eventType;
-    private String operation;
+    private String eventType; // одно из значений LIKE, REVIEW или FRIEND
+    private String operation; // одно из значениий REMOVE, ADD, UPDATE
     @NonNull
-    private Long entityId;
+    private Long entityId;  // идентификатор сущности, с которой произошло событие
 
 }
