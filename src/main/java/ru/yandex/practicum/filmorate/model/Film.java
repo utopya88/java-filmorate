@@ -13,22 +13,22 @@ import lombok.NonNull;
 @Data
 public class Film {
 
-    private long id; // целочисленный идентификатор
+    private long id;
     @NonNull
     @NotBlank(message = "Ошибка! Название не может быть пустым.")
-    private String name; // название
+    private String name;
     @NonNull
-    private String description; // описание
+    private String description;
     @NonNull
     @JsonFormat(pattern = "yyyy-MM-dd")
-    private LocalDate releaseDate; // дата релиза
+    private LocalDate releaseDate;
     @Positive(message = "Ошибка! Продолжительность фильма должна быть положительной.")
-    private int duration; // продолжительность
-    private int rate; // рейтинг
-    private Set<Long> likes = new HashSet<>(); // пользователи, лайкнувшие фильм
-    private Set<Genre> genres = new HashSet<>(); // жанры
-    private RatingMPA mpa; // рейтинг Ассоциации кинокомпаний (МРА)
-    private Set<Director> directors = new HashSet<>(); // режиссёры
-    private Set<Mark> marks = new HashSet<>(); // оценки
+    private int duration;
+    private int rate;
+    private Set<Long> likes = new HashSet<>();
+    private Set<Genre> genres = new HashSet<>();
+    private RatingMPA mpa;
+    private Set<Director> directors = new HashSet<>();
+    private Set<Mark> marks = new HashSet<>();
 
 }

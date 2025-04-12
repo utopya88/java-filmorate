@@ -7,11 +7,10 @@ import javax.validation.constraints.NotBlank;
 
 @Data
 public class Director {
-    // режиссёры фильмов, могут быть несколько у одного
 
     @NonNull
-    private Long id; // целочисленный идентификатор
+    private Long id;
     @NotBlank(message = "Ошибка! Название не может быть пустым.")
-    private final String name; // название
+    private final String name;
 
 }

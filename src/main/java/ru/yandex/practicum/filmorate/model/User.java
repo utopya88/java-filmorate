@@ -13,18 +13,18 @@ import lombok.NonNull;
 @Data
 public class User {
 
-    private long id; // целочисленный идентификатор
-    private String name; // имя для отображения
+    private long id;
+    private String name;
     @NonNull
     @NotBlank
     @Email(message = "Ошибка! Неверный e-mail.")
-    private String email; // электронная почта
+    private String email;
     @NonNull
     @NotBlank(message = "Ошибка! Логин не может быть пустым.")
-    private String login; // логин пользователя
+    private String login;
     @NonNull
     @JsonFormat(pattern = "yyyy-MM-dd")
-    private LocalDate birthday; // дата рождения
-    private Set<Long> friends = new HashSet<>(); // друзья
+    private LocalDate birthday;
+    private Set<Long> friends = new HashSet<>();
 
 }
