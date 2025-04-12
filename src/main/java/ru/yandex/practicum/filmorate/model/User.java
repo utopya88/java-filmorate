@@ -1,34 +1,30 @@
 package ru.yandex.practicum.filmorate.model;
 
-import lombok.Builder;
-import lombok.Data;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import lombok.*;
+import org.springframework.validation.annotation.Validated;
+import ru.yandex.practicum.filmorate.validation.AfterDate;
 
-import javax.validation.constraints.Email;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
-import java.util.Map;
+import java.util.List;
 
 @Data
-@Builder
+@Validated
+@EqualsAndHashCode
+@Builder(toBuilder = true)
+@RequiredArgsConstructor
+@AllArgsConstructor
 public class User {
-    private int id;
+    private Long id;
     @Email
-    @NotNull
-    @NotBlank
+    @NotBlank(message = "Почта не может быть пустая")
     private String email;
-    @NotNull
-    @NotBlank
+    @NotBlank(message = "Login не должен быть пустым")
     private String login;
     private String name;
+    @AfterDate
     private LocalDate birthday;
-    private Map<Integer, Boolean> friends; // список друзей со статусом
-
-    public void addFriend(Integer friendId) {
-        this.friends.put(friendId, false);
-    }
-
-    public void deleteFromFriends(Integer friendId) {
-        this.friends.remove(friendId);
-    }
+    private List<Long> friends;
 }
+

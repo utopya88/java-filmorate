@@ -3,23 +3,23 @@ package ru.yandex.practicum.filmorate.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
-import ru.yandex.practicum.filmorate.model.Genre;
-import ru.yandex.practicum.filmorate.storage.genre.GenreStorage;
+import ru.yandex.practicum.filmorate.model.Mpa;
+import ru.yandex.practicum.filmorate.storage.mpa.MpaStorage;
 
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class GenreService {
-    private final GenreStorage storage;
+public class MpaService {
+    private final MpaStorage storage;
 
-    public List<Genre> getAll() {
+    public List<Mpa> getAll() {
         return storage.getAll();
     }
 
-    public Genre getById(Long id) {
+    public Mpa getById(Long id) {
         if (storage.getById(id) == null) {
-            throw new NotFoundException("Жанра с таким id = " + id + " нет");
+            throw new NotFoundException("Рейтинга с таким id = " + id + " нет");
         } else {
             return storage.getById(id);
         }

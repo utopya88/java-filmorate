@@ -1,58 +1,55 @@
 package ru.yandex.practicum.filmorate.storage.genre;
 
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
+import org.springframework.context.annotation.Primary;
+import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.jdbc.core.DataClassRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
+import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Genre;
 
-import java.util.ArrayList;
 import java.util.List;
 
-@Slf4j
+@AllArgsConstructor
 @Component
+@Primary
 public class GenreDbStorage implements GenreStorage {
-
     private final JdbcTemplate jdbcTemplate;
 
-    @Autowired
-    public GenreDbStorage(JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
+    @Override
+    public List<Genre> getAll() {
+        return jdbcTemplate.query("SELECT * FROM genres", new DataClassRowMapper<>(Genre.class));
     }
 
     @Override
-    public List<Genre> findAll() {
-        List<Genre> genres = new ArrayList<>();
-        String sql = "select * from genres";
-        SqlRowSet genreRows = jdbcTemplate.queryForRowSet(sql);
-        while (genreRows.next()) {
-            genres.add(makeGenre(genreRows));
+    public Genre getById(Long id) {
+        try {
+            return jdbcTemplate.queryForObject("SELECT id, name FROM genres WHERE id = ?", new DataClassRowMapper<>(Genre.class), id);
+        } catch (EmptyResultDataAccessException e) {
+            throw new NotFoundException("Жанр с id = " + id + " не найден");
         }
-        log.info("Количество жанров фильмов в базе: {}", genres.size());
-        return genres;
+
     }
 
     @Override
-    public Genre findGenreById(Integer genreId) {
-        String sql = "select * from genres where id = ?";
-        SqlRowSet genreRows = jdbcTemplate.queryForRowSet(sql, genreId);
-        if (genreRows.next()) {
-            Genre genre = makeGenre(genreRows);
-            log.info("Найден жанр фильма в базе: {}", genre);
-            return genre;
-        } else {
-            log.info("В базе отсутствует жанр фильма с id: {}", genreId);
-            throw new NotFoundException();
+    public List<Genre> getGenresOfFilm(Long id) {
+        try {
+            return jdbcTemplate.query("SELECT * FROM genres WHERE id IN (SELECT genre_id FROM films_genre WHERE film_id = ?);", new DataClassRowMapper<>(Genre.class), id);
+        } catch (EmptyResultDataAccessException e) {
+            return null;
         }
+
     }
 
-    private Genre makeGenre(SqlRowSet genreRows) {
-        Genre genre = Genre.builder()
-                .id(genreRows.getInt("id"))
-                .name(genreRows.getString("name"))
-                .build();
-        return genre;
+    @Override
+    public boolean checkGenresExists(List<Genre> genres) {
+        for (Genre genre : genres) {
+            if ((jdbcTemplate.query("SELECT * FROM genres WHERE id = ?", new DataClassRowMapper<>(Genre.class),genre.getId())).isEmpty()) {
+                throw new ValidationException("Жанр с id = " + genre.getId() + " отсутствует");
+            }
+        }
+        return true;
     }
 }

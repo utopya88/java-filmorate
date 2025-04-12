@@ -1,223 +1,112 @@
 package ru.yandex.practicum.filmorate.storage.user;
 
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Primary;
+import org.springframework.jdbc.core.DataClassRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
-import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.exception.NotFoundException;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 
-import java.sql.Connection;
 import java.sql.Date;
 import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.time.LocalDate;
 import java.util.*;
 
-@Slf4j
+@AllArgsConstructor
 @Component
-@Qualifier("userDbStorage")
+@Slf4j
+@Primary
 public class UserDbStorage implements UserStorage {
-
     private final JdbcTemplate jdbcTemplate;
-
-    @Autowired
-    public UserDbStorage(JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
-    }
+    private final UserRowMapper mapper;
 
     @Override
-    public List<User> get() {
-        List<User> users = new ArrayList<>();
-        String sql = "select * from users";
-        SqlRowSet userRows = jdbcTemplate.queryForRowSet(sql);
-        while (userRows.next()) {
-            users.add(makeUser(userRows));
-        }
-        log.info("Количество пользователей в базе: {}", users.size());
-        return users;
-    }
-
-    private User makeUser(SqlRowSet userRows) {
-        int userId = userRows.getInt("id");
-        Map<Integer, Boolean> friendships = new HashMap<>();
-        String sql = "select friend_id, status from friendships where user_id = ?";
-        SqlRowSet friendshipRows = jdbcTemplate.queryForRowSet(sql, userId);
-        while (friendshipRows.next()) {
-            friendships.put(friendshipRows.getInt("friend_id"), friendshipRows.getBoolean("status"));
-        }
-        return User.builder()
-                .id(userId)
-                .email(userRows.getString("email"))
-                .login(userRows.getString("login"))
-                .name(userRows.getString("name"))
-                .birthday(userRows.getDate("birthday").toLocalDate())
-                .friends(friendships)
-                .build();
-    }
-
-    @Override
-    public User create(User user) {
-        validate(user);
-        String name = user.getName();
-        String login = user.getLogin();
-        if (name == null || name.isEmpty()) {
-            user.setName(login);
-            log.info("Для пользователя с логином {} установлено новое имя {}", login, user.getName());
-        }
-        if (user.getFriends() == null) {
-            user.setFriends(new HashMap<>());
-        }
-        String sqlQuery = "insert into users (email, login, name, birthday) " +
-                "values (?, ?, ?, ?)";
+    public User createUser(User user) {
+        String sqlQuery =
+                "INSERT INTO users (email, login, name, birthday)values (?, ?, ?, ?)";
         KeyHolder keyHolder = new GeneratedKeyHolder();
-        jdbcTemplate.update(new PreparedStatementCreator() {
-            @Override
-            public PreparedStatement createPreparedStatement(Connection connection) throws SQLException {
-                PreparedStatement stmt = connection.prepareStatement(sqlQuery, new String[]{"id"});
-                stmt.setString(1, user.getEmail());
-                stmt.setString(2, user.getLogin());
-                stmt.setString(3, user.getName());
-                stmt.setDate(4, Date.valueOf(user.getBirthday()));
-                return stmt;
-            }
+        jdbcTemplate.update(connection -> {
+            PreparedStatement stmt = connection.prepareStatement(sqlQuery, new String[]{"id"});
+            stmt.setString(1, user.getEmail());
+            stmt.setString(2, user.getLogin());
+            stmt.setString(3, user.getName());
+            stmt.setDate(4, Date.valueOf(user.getBirthday()));
+            return stmt;
         }, keyHolder);
-        user.setId(keyHolder.getKey().intValue());
-        createFriendships(user.getId(), user.getFriends());
-        log.info("Добавлен новый пользователь: {}", user);
+        user.setId(Objects.requireNonNull(keyHolder.getKey()).longValue());
+       return user;
+    }
+
+    @Override
+    public User updateUser(User user) {
+        String sqlQuery =
+                "UPDATE users SET email = ?, login = ?, name = ?, birthday = ? WHERE id = ?";
+        jdbcTemplate.update(
+                sqlQuery,
+                user.getEmail(),
+                user.getLogin(),
+                user.getName(),
+                user.getBirthday(),
+                user.getId()
+        );
         return user;
     }
 
-    private void createFriendships(int userId, Map<Integer, Boolean> friends) {
-        String sqlFriends = "insert into friendships (user_id, friend_id, status) " +
-                "values (?, ?, ?)";
-        for (Map.Entry<Integer, Boolean> entry : friends.entrySet()) {
-            jdbcTemplate.update(sqlFriends,
-                    userId,
-                    entry.getKey(),
-                    entry.getValue());
-        }
-    }
+    @Override
+    public User getUser(Long id) {
+            List<User> users = jdbcTemplate.query("SELECT " +
+                   "u.ID, " +
+                   "u.EMAIL, " +
+                   "u.LOGIN, " +
+                   "u.NAME, " +
+                   "u.BIRTHDAY, " +
+                   "f.USER2_ID " +
+                   "FROM USERS AS u " +
+                   "LEFT JOIN FRIENDS AS f ON (f.USER1_ID  = u.ID)" +
+                   "WHERE u.id = ?", mapper, id);
+            if (users.size() == 0) {
+                return null;
+            }
+            return users.get(0);
+           }
 
-    private static void validate(User user) {
-        String email = user.getEmail();
-        String login = user.getLogin();
-        LocalDate birthday = user.getBirthday();
-        if (email == null || email.isEmpty() || !email.contains("@")) {
-            log.info("Электронная почта не указана или не указан символ '@'");
-            throw new ValidationException("Электронная почта не указана или не указан символ '@'");
-        } else if (login == null || login.isEmpty() || login.contains(" ")) {
-            log.info("Логин пользователя с электронной почтой {} не указан или содержит пробел", email);
-            throw new ValidationException("Логин пользователя с электронной почтой {} не указан или содержит пробел");
-        } else if (birthday.isAfter(LocalDate.now())) {
-            log.info("Дата рождения пользователя с логином {} указана будущим числом", login);
-            throw new ValidationException("Дата рождения пользователя с логином {} указана будущим числом");
-        }
+    @Override
+    public List<User> getAllUsers() {
+        List<User> users = jdbcTemplate.query("SELECT " +
+                "u.ID, " +
+                "u.EMAIL, " +
+                "u.LOGIN, " +
+                "u.NAME, " +
+                "u.BIRTHDAY, " +
+                "f.USER2_ID " +
+                "FROM USERS u " +
+                "LEFT JOIN FRIENDS f ON (f.USER1_ID  = u.ID)", mapper);
+        Set<User> uniqueUser = new TreeSet<>(Comparator.comparing(User::getId));
+        uniqueUser.addAll(users);
+        return new ArrayList<>(uniqueUser);
     }
 
     @Override
-    public User update(User user) {
-        validate(user);
-        int userId = user.getId();
-        if (user.getFriends() == null) {
-            user.setFriends(new HashMap<>());
-        }
-        String sqlQuery = "update users set " +
-                "email = ?, login = ?, name = ?, birthday = ?" +
-                "where id = ?";
-        int totalUpdate = jdbcTemplate.update(sqlQuery,
-            user.getEmail(),
-            user.getLogin(),
-            user.getName(),
-            user.getBirthday(),
-            userId);
-        if (totalUpdate == 0) {
-            log.info("Не найден пользователь в списке с id: {}", userId);
-            throw new NotFoundException();
-        }
-        sqlQuery = "delete from friendships where user_id = ? ";
-        jdbcTemplate.update(sqlQuery, userId);
-        addFriendship(user);
-        log.info("Обновлены данные пользователя с id {}. Новые данные: {}", userId, user);
-        return user;
-    }
-
-    private void addFriendship(User user) {
-        String sqlQuery = "insert into friendships (user_id, friend_id, status) " +
-                "values (?, ?, ?)";
-        int userId = user.getId();
-        Map<Integer, Boolean> friends = user.getFriends();
-        for (Map.Entry<Integer, Boolean> friendship : friends.entrySet()) {
-            jdbcTemplate.update(sqlQuery,
-                    userId,
-                    friendship.getKey(),
-                    friendship.getValue());
-        }
+    public void addFriends(Long userId, Long friendId) {
+        jdbcTemplate.update("INSERT INTO friends (user1_id, user2_id, status)values (?, ?, ?)", userId, friendId, true);
     }
 
     @Override
-    public User getUserById(Integer userId) {
-        String sql = "select * from users where id = ?";
-        SqlRowSet userRows = jdbcTemplate.queryForRowSet(sql, userId);
-        if (userRows.next()) {
-            User user = makeUser(userRows);
-            log.info("Найден пользователь в базе: {}", user);
-            return user;
-        } else {
-            log.info("В списке отсутствует пользователь с id: {}", userId);
-            throw new NotFoundException();
-        }
+    public void removeFriends(Long  userId, Long friendId) {
+        jdbcTemplate.update("DELETE FROM friends WHERE user1_id = ? AND user2_id = ?", userId, friendId);
     }
 
     @Override
-    public List<User> addToFriends(Integer userId, Integer friendId) {
-        User user = getUserById(userId);
-        User friend = getUserById(friendId);
-        user.addFriend(friendId);
-        update(user);
-        return getFriends(userId); // вернём список всех друзей (включая нового друга с friendId) пользователя с userId
+    public List<User> getFriends(Long id) {
+        return jdbcTemplate.query("SELECT * FROM users WHERE id IN (SELECT user2_id FROM friends WHERE user1_id = ? AND status = true)", new DataClassRowMapper<>(User.class), id);
     }
 
     @Override
-    public void deleteFromFriends(Integer userId, Integer friendId) {
-        User user = getUserById(userId);
-        User friend = getUserById(friendId);
-        user.deleteFromFriends(friendId);
-        update(user);
+    public List<User> getCommonFriends(Long id, Long friendId) {
+        return jdbcTemplate.query("SELECT * FROM users WHERE id IN (SELECT user2_id FROM friends WHERE user1_id = ? AND status = true AND user2_id IN ( SELECT user2_id FROM friends WHERE user1_id = ? AND status = true))", new DataClassRowMapper<>(User.class), id, friendId);
+
     }
 
-    @Override
-    public List<User> getFriends(Integer userId) {
-        List<User> friends = new ArrayList<>();
-        String sqlQuery = "select * from users where id in (select distinct friend_id id from friendships where user_id = ?)";
-        SqlRowSet friendshipRows = jdbcTemplate.queryForRowSet(sqlQuery, userId);
-        while (friendshipRows.next()) {
-            User user = makeUser(friendshipRows);
-            friends.add(user);
-            log.info("В список друзей добавлен пользователь: {}", user);
-        }
-        log.info("Количество пользователей в списке друзей: {}", friends.size());
-        return friends;
-    }
-
-    @Override
-    public List<User> getCommonFriends(Integer userId, Integer friendId) {
-        List<User> commonFriends = new ArrayList<>();
-        String sqlQuery = "select * from users where id in (select friend_id from friendships where user_id = ? and friend_id in " +
-            "(select distinct friend_id from friendships where user_id = ?))";
-        SqlRowSet friendsRows = jdbcTemplate.queryForRowSet(sqlQuery, userId, friendId);
-        if (friendsRows.next()) {
-            User user = makeUser(friendsRows);
-            commonFriends.add(user);
-            log.info("В общий список друзей добавлен пользователь: {}", user);
-        }
-        log.info("В списке общих друзей {} пользователей", commonFriends.size());
-        return commonFriends;
-    }
 }

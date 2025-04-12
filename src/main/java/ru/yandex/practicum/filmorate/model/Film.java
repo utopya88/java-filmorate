@@ -1,32 +1,34 @@
 package ru.yandex.practicum.filmorate.model;
 
-import lombok.Builder;
-import lombok.Data;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.Size;
+import lombok.*;
+import org.springframework.validation.annotation.Validated;
+import ru.yandex.practicum.filmorate.validation.BeforeDate;
 
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
-import java.util.Set;
+import java.util.List;
 
 @Data
-@Builder
+@Validated
+@EqualsAndHashCode
+@Builder(toBuilder = true)
+@NoArgsConstructor
+@RequiredArgsConstructor
+@AllArgsConstructor
 public class Film {
-    private int id;
-    @NotNull
-    @NotBlank
+    private Long id;
+    @NotBlank(message = "Название не может быть пустым")
     private String name;
+    @Size(max = 200)
     private String description;
+    @BeforeDate
     private LocalDate releaseDate;
-    private long duration;
-    private Set<Integer> likesByUsers; // список пользователей, кто поставил лайк
-    private Set<Genre> genres;
-    private Rating mpa;
-
-    public void addLike(Integer userId) {
-        this.likesByUsers.add(userId);
-    }
-
-    public void deleteLike(Integer userId) {
-        this.likesByUsers.remove(userId);
-    }
+    @Positive
+    private Integer duration;
+    private List<Long> likes;
+    private List<Genre> genres;
+    @NonNull
+    private Mpa mpa;
 }
