@@ -1,88 +1,123 @@
 package ru.yandex.practicum.filmorate.service;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
-
-import ru.yandex.practicum.filmorate.exception.FindObjectException;
+import ru.yandex.practicum.filmorate.exception.ConditionsNotMetException;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.storage.user.FriendsExtractor;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-
-
-@Slf4j
 @Service
-public class UserService {
+@Slf4j(topic = "TRACE")
+@RequiredArgsConstructor
+public class UserService implements UserInterface {
+
+    //sQL-запросы
+    private static final String SQL_SELECT_FRIENDS = "select userId, friendId from friends";
+    private static final String SQL_INSERT_FRIEND = "insert into friends(userId, friendId) values (?, ?)";
+    private static final String SQL_DELETE_FRIEND = "delete from friends where userId = ? and friendId = ?";
+
+    //сообщения для логирования и исключений
+    private static final String LOG_POST_REQUEST = "Обработка Post-запроса...";
+    private static final String LOG_DELETE_REQUEST = "Обработка Del-запроса...";
+    private static final String LOG_GET_REQUEST = "Обработка Get-запроса...";
+    private static final String ERROR_FRIEND_ALREADY_ADDED = "Пользователь с id %d уже добавлен в друзья";
+    private static final String ERROR_USER_NOT_FOUND = "Пользователь с данным идентификатором отсутствует в базе";
 
     private final UserStorage userStorage;
+    private final JdbcTemplate jdbcTemplate;
 
+    @Override
+    public User addFriend(Long idUser, Long idFriend) {
+        log.info(LOG_POST_REQUEST);
 
-    public UserService(UserStorage userStorage) {
-        this.userStorage = userStorage;
-    }
+        validateUserExists(idUser);
+        validateUserExists(idFriend);
 
-    public User getUserById(Integer id) {
-        if (!userStorage.isFindUserById(id)) {
-            throw new FindObjectException("Пользователь с таким идентификатором не найден");
+        if (isFriend(idUser, idFriend)) {
+            logAndThrowConditionsNotMetException(String.format(ERROR_FRIEND_ALREADY_ADDED, idFriend));
         }
-        return userStorage.getUserById(id).get();
+
+        jdbcTemplate.update(SQL_INSERT_FRIEND, idUser, idFriend);
+        return userStorage.findById(idUser);
     }
 
-    public List<User> viewInterFriends(Integer idFriendOne, Integer idFriendTwo) {
-        if (!userStorage.isFindUserById(idFriendOne) || !userStorage.isFindUserById(idFriendTwo)) {
-            throw new FindObjectException("Пользователь с таким идентификатором не найден");
+    @Override
+    public User delFriend(Long idUser, Long idFriend) {
+        log.info(LOG_DELETE_REQUEST);
+
+        validateUserExists(idUser);
+        validateUserExists(idFriend);
+
+        jdbcTemplate.update(SQL_DELETE_FRIEND, idUser, idFriend);
+        return userStorage.findById(idUser);
+    }
+
+    @Override
+    public Set<User> findJointFriends(Long idUser, Long idFriend) {
+        log.info(LOG_GET_REQUEST);
+
+        validateUserExists(idUser);
+        validateUserExists(idFriend);
+
+        String sqlSelectJointFriends = "SELECT f1.friendId AS jointFriendId " +
+                "FROM friends f1 " +
+                "JOIN friends f2 ON f1.friendId = f2.friendId " +
+                "WHERE f1.userId = ? AND f2.userId = ?";
+
+        Set<Long> jointFriendIds = new HashSet<>(jdbcTemplate.queryForList(
+                sqlSelectJointFriends, Long.class, idUser, idFriend));
+
+        Set<User> result = new HashSet<>();
+        for (Long friendId : jointFriendIds) {
+            result.add(userStorage.findById(friendId));
         }
-        return returnFriendsList(idFriendOne).stream()
-                .filter(f -> returnFriendsList(idFriendTwo).contains(f))
-                .collect(Collectors.toList());
+        return result;
     }
 
-    public List<User> returnFriendsList(Integer id) {
-        List<User> friend = new ArrayList<>();
-        for (Integer i: getUserById(id).getFriends()) {
-            friend.add(getUserById(i));
+    @Override
+    public Set<User> findAllFriends(Long idUser) {
+        log.info(LOG_GET_REQUEST);
+
+        validateUserExists(idUser);
+
+        Map<Long, Set<Long>> friends = jdbcTemplate.query(SQL_SELECT_FRIENDS, new FriendsExtractor());
+        assert friends != null;
+        Set<Long> userFriends = friends.getOrDefault(idUser, new HashSet<>());
+
+        Set<User> result = new HashSet<>();
+        for (Long friendId : userFriends) {
+            result.add(userStorage.findById(friendId));
         }
-        return friend;
+        return result;
     }
 
-    public boolean addFriend(Integer id, Integer friendId) {
-        if (!userStorage.isFindUserById(id) || !userStorage.isFindUserById(friendId)) {
-            throw new FindObjectException("Не найден идентификатор пользователя или его друга");
+    private void validateUserExists(Long userId) {
+        if (userStorage.findById(userId) == null) {
+            logAndThrowNotFoundException(userId.toString());
         }
-         getUserById(id).getFriends().add(friendId);
-         getUserById(friendId).getFriends().add(id);
-         log.trace("Добавили друзей друг другу");
-         return true;
     }
 
-    public boolean deleteFriend(Integer id, Integer friendId) {
-        if (!userStorage.isFindUserById(id) || !userStorage.isFindUserById(friendId)) {
-            throw new FindObjectException("Не найден идентификатор пользователя или его друга");
-        }
-        getUserById(id).getFriends().remove(friendId);
-        getUserById(friendId).getFriends().remove(id);
-        log.trace("Удалили друзей у друг друга");
-        return true;
+    private boolean isFriend(Long idUser, Long idFriend) {
+        Map<Long, Set<Long>> friends = jdbcTemplate.query(SQL_SELECT_FRIENDS, new FriendsExtractor());
+        assert friends != null;
+        return friends.getOrDefault(idUser, new HashSet<>()).contains(idFriend);
     }
 
-    public User create(User user) {
-        if (userStorage.findAll().contains(user)) {
-            throw new FindObjectException("Такой пользователь уже существуют");
-        }
-        return userStorage.create(user).get();
+    private void logAndThrowConditionsNotMetException(String message) {
+        log.error("Exception", new ConditionsNotMetException(message));
+        throw new ConditionsNotMetException(message);
     }
 
-    public User update(User user) {
-        if (!userStorage.isFindUserById(user.getId())) {
-            throw new FindObjectException("Не найден обьект для обновления");
-        }
-        return userStorage.update(user).get();
-    }
-
-    public ArrayList<User> findAllUsers() {
-        return userStorage.findAll();
+    private void logAndThrowNotFoundException(String value) {
+        log.error("Exception", new NotFoundException(UserService.ERROR_USER_NOT_FOUND));
+        throw new NotFoundException(UserService.ERROR_USER_NOT_FOUND);
     }
 }

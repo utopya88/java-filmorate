@@ -1,21 +1,18 @@
 package ru.yandex.practicum.filmorate.storage.film;
 
-import org.springframework.web.bind.annotation.RequestBody;
+import ru.yandex.practicum.filmorate.model.Buffer;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.FilmResponse;
 
-import java.util.ArrayList;
-import java.util.Optional;
+import java.util.List;
 
 public interface FilmStorage {
 
-    ArrayList<Film> findAll();
+    List<Film> findAll();
 
-    Optional<Film> create(@RequestBody Film film);
+    FilmResponse findById(Long id);
 
-    Optional<Film> update(@RequestBody Film newFilm);
+    FilmResponse create(Buffer film);
 
-    Film findFilmById(Integer id);
-
-    boolean isFindFilmById(Integer id);
-
+    FilmResponse update(Buffer newFilm);
 }
