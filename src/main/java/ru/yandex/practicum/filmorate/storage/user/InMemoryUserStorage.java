@@ -69,14 +69,12 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     private static void validate(User user) {
-        String email = user.getEmail();
         String login = user.getLogin();
         LocalDate birthday = user.getBirthday();
-        if (email.isBlank() || email.isEmpty() || !email.contains("@")) {
-            log.info("Электронная почта не указана или не указан символ '@'");
-            throw new ValidationException("Электронная почта не указана или не указан символ '@'");
-        } else if (login == null || login.isEmpty() || login.contains(" ")) {
-            log.info("Логин пользователя с электронной почтой {} не указан или содержит пробел", email);
+        if (user.getEmail().isEmpty() || user.getEmail().isBlank() || !user.getEmail().contains("@")) {
+            throw new ValidationException("Ошибка валидации. Неверный email формат.");
+        } else if (user.getLogin() == null || user.getLogin().isEmpty() || user.getLogin().contains(" ")) {
+            log.info("Логин пользователя с электронной почтой {} не указан или содержит пробел", user.getEmail());
             throw new ValidationException("Логин пользователя с электронной почтой {} не указан или содержит пробел");
         } else if (birthday.isAfter(LocalDate.now())) {
             log.info("Дата рождения пользователя с логином {} указана будущим числом", login);
