@@ -47,7 +47,7 @@ public class FilmController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public FilmResponse create(@Valid @RequestBody FilmDto filmDto) {
+    public FilmResponse create(@RequestBody FilmDto filmDto) {
         //Buffer buffer = parseObjectNodeToBuffer(objectNode);
         return filmStorage.create(filmDto);
     }
