@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+//import com.fasterxml.jackson.databind.node.ObjectNode;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jdk.jfr.Description;
@@ -38,4 +39,32 @@ public class Buffer {
         values.put("ratingId", mpa);
         return values;
     }
+
+//    private Buffer parseObjectNodeToBuffer(ObjectNode objectNode) {
+ //       Long id = objectNode.has("id") ? objectNode.get("id").asLong() : 0L;
+  //      String name = objectNode.get("name").asText();
+    //    String description = objectNode.get("description").asText();
+      //  String releaseDate = objectNode.get("releaseDate").asText();
+        //Integer duration = objectNode.get("duration").asInt();
+        //List<String> mpa = objectNode.get("mpa").findValuesAsText("id");
+        //List<String> genres = extractGenresFromObjectNode(objectNode);
+
+       // return Buffer.of(
+         //       id,
+           //     name,
+             //   description,
+               // LocalDate.parse(releaseDate, DATE_FORMATTER),
+                //duration,
+                //genres,
+                //Long.valueOf(mpa.get(0))
+        //);
+    //}
+
+    //private List<String> extractGenresFromObjectNode(ObjectNode objectNode) {
+      //  try {
+        //    return objectNode.get("genres").findValuesAsText("id");
+        //} catch (NullPointerException e) {
+          //  return List.of(DEFAULT_GENRE);
+        //}
+    //}
 }

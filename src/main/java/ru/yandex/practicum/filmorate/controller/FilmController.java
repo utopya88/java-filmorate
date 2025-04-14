@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.Buffer;
+import ru.yandex.practicum.filmorate.model.dto.Film.FilmDto;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.FilmResponse;
 import ru.yandex.practicum.filmorate.service.FilmInterface;
@@ -46,9 +47,9 @@ public class FilmController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public FilmResponse create(@Valid @RequestBody ObjectNode objectNode) {
-        Buffer buffer = parseObjectNodeToBuffer(objectNode);
-        return filmStorage.create(buffer);
+    public FilmResponse create(@Valid @RequestBody FilmDto filmDto) {
+        //Buffer buffer = parseObjectNodeToBuffer(objectNode);
+        return filmStorage.create(filmDto);
     }
 
     @PutMapping
@@ -72,31 +73,31 @@ public class FilmController {
         return filmInterface.viewRating(count);
     }
 
-    private Buffer parseObjectNodeToBuffer(ObjectNode objectNode) {
-        Long id = objectNode.has("id") ? objectNode.get("id").asLong() : 0L;
-        String name = objectNode.get("name").asText();
-        String description = objectNode.get("description").asText();
-        String releaseDate = objectNode.get("releaseDate").asText();
-        Integer duration = objectNode.get("duration").asInt();
-        List<String> mpa = objectNode.get("mpa").findValuesAsText("id");
-        List<String> genres = extractGenresFromObjectNode(objectNode);
+   private Buffer parseObjectNodeToBuffer(ObjectNode objectNode) {
+       Long id = objectNode.has("id") ? objectNode.get("id").asLong() : 0L;
+       String name = objectNode.get("name").asText();String description = objectNode.get("description").asText();
+       String releaseDate = objectNode.get("releaseDate").asText();
+       Integer duration = objectNode.get("duration").asInt();
+       List<String> mpa = objectNode.get("mpa").findValuesAsText("id");
+       List<String> genres = extractGenresFromObjectNode(objectNode);
 
-        return Buffer.of(
-                id,
-                name,
-                description,
-                LocalDate.parse(releaseDate, DATE_FORMATTER),
-                duration,
-                genres,
-                Long.valueOf(mpa.get(0))
-        );
+     return Buffer.of(
+         id,
+         name,
+         description,
+         LocalDate.parse(releaseDate, DATE_FORMATTER),
+         duration,
+         genres,
+         Long.valueOf(mpa.get(0))
+    );
     }
 
     private List<String> extractGenresFromObjectNode(ObjectNode objectNode) {
-        try {
-            return objectNode.get("genres").findValuesAsText("id");
-        } catch (NullPointerException e) {
-            return List.of(DEFAULT_GENRE);
-        }
+      try {
+        return objectNode.get("genres").findValuesAsText("id");
+    } catch (NullPointerException e) {
+      return List.of(DEFAULT_GENRE);
     }
+    }
+
 }
