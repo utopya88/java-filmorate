@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.ConditionsNotMetException;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.FilmResponse;
-//import ru.yandex.practicum.filmorate.storage.film.FilmDbStorage;
+import ru.yandex.practicum.filmorate.storage.film.FilmDbStorage;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
@@ -24,7 +24,7 @@ public class FilmServiceImpl implements FilmService {
 
     // SQL-запросы
     private final String selectTopFilmsQuery = "SELECT f.id as name, COUNT(l.userId) as coun FROM likedUsers as l LEFT OUTER JOIN film AS f ON l.filmId = f.id GROUP BY f.name ORDER BY COUNT(l.userId) DESC LIMIT 10";
-
+    private final String deleteLikeQuery = "DELETE FROM likedUsers WHERE filmId = ? AND userId = ?";
     @Override
     public FilmResponse addLike(Long idUser, Long idFilm) {
         if (userStorage.findById(idUser) != null && filmStorage.findById(idFilm) != null) {
@@ -55,7 +55,7 @@ public class FilmServiceImpl implements FilmService {
                 log.error("Пользователь с ID {} не ставил лайк фильму с ID {}", idUser, idFilm);
                 throw new ConditionsNotMetException("Пользователь с ID " + idUser + " не ставил лайк фильму с ID " + idFilm);
             } else {
-                filmStorage.deleteLike(idUser, idFilm);
+                jdbcTemplate.update(deleteLikeQuery, idFilm, idUser);
             }
         }
         FilmResponse film = filmStorage.findById(idFilm);
