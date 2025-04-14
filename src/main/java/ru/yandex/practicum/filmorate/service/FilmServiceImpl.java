@@ -21,10 +21,6 @@ public class FilmServiceImpl implements FilmService {
     private final FilmStorage filmStorage;
     private final JdbcTemplate jdbcTemplate;
 
-    // SQL-запросы
-    private final String selectTopFilmsQuery = "SELECT f.id as name, COUNT(l.userId) as coun FROM likedUsers as l LEFT OUTER JOIN film AS f ON l.filmId = f.id GROUP BY f.name ORDER BY COUNT(l.userId) DESC LIMIT 10";
-    private final String deleteLikeQuery = "DELETE FROM likedUsers WHERE filmId = ? AND userId = ?";
-
     @Override
     public FilmResponse addLike(Long idUser, Long idFilm) {
         if (userStorage.findById(idUser) != null && filmStorage.findById(idFilm) != null) {
@@ -55,7 +51,7 @@ public class FilmServiceImpl implements FilmService {
                 log.error("Пользователь с ID {} не ставил лайк фильму с ID {}", idUser, idFilm);
                 throw new ConditionsNotMetException("Пользователь с ID " + idUser + " не ставил лайк фильму с ID " + idFilm);
             } else {
-                jdbcTemplate.update(deleteLikeQuery, idFilm, idUser);
+                filmStorage.deleteLike(idUser, idFilm);
             }
         }
         FilmResponse film = filmStorage.findById(idFilm);
@@ -70,7 +66,7 @@ public class FilmServiceImpl implements FilmService {
 
     public LinkedHashSet<FilmResponse> viewRating(Long count) {
         log.info("Обработка Get-запроса...");
-        LinkedHashMap<Long, Long> likedUsers = jdbcTemplate.query(selectTopFilmsQuery, new TopLikedUsersExtractor());
+        LinkedHashMap<Long, Long> likedUsers = filmStorage.selectTopFilms();
         LinkedHashSet<FilmResponse> films = new LinkedHashSet<>();
         if (likedUsers == null) {
             log.error("Список фильмов с рейтингом пуст.");
