@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.ConditionsNotMetException;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.FilmResponse;
+import ru.yandex.practicum.filmorate.storage.film.FilmDbStorage;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
@@ -69,7 +70,7 @@ public class FilmServiceImpl implements FilmService {
 
     public LinkedHashSet<FilmResponse> viewRating(Long count) {
         log.info("Обработка Get-запроса...");
-        LinkedHashMap<Long, Long> likedUsers = filmStorage.selectTopFilms();
+        LinkedHashMap<Long, Long> likedUsers = jdbcTemplate.query(selectTopFilmsQuery, new TopLikedUsersExtractor());
         LinkedHashSet<FilmResponse> films = new LinkedHashSet<>();
         if (likedUsers == null) {
             log.error("Список фильмов с рейтингом пуст.");
