@@ -23,7 +23,6 @@ public class FilmServiceImpl implements FilmService {
     private final JdbcTemplate jdbcTemplate;
 
     // SQL-запросы
-    private final String selectLikedUsersQuery = "SELECT filmId, userId FROM likedUsers";
     private final String insertLikeQuery = "INSERT INTO likedUsers(filmId, userId) VALUES (?, ?)";
     private final String selectFilmGenresQuery = "SELECT filmId, genreId FROM filmGenre WHERE filmId = ?";
     private final String deleteLikeQuery = "DELETE FROM likedUsers WHERE filmId = ? AND userId = ?";
@@ -32,7 +31,7 @@ public class FilmServiceImpl implements FilmService {
     @Override
     public FilmResponse addLike(Long idUser, Long idFilm) {
         if (userStorage.findById(idUser) != null && filmStorage.findById(idFilm) != null) {
-            Map<Long, Set<Long>> likedUsers = jdbcTemplate.query(selectLikedUsersQuery, new FilmDbStorage.LikedUsersExtractor());
+            Map<Long, Set<Long>> likedUsers = filmStorage.selectLikedUsers();
             if (likedUsers.get(idFilm) != null && likedUsers.get(idFilm).contains(idUser)) {
                 log.error("Пользователь с ID {} уже поставил лайк фильму с ID {}", idUser, idFilm);
                 throw new ConditionsNotMetException("Пользователь с ID " + idUser + " уже поставил лайк фильму с ID " + idFilm);
@@ -54,7 +53,7 @@ public class FilmServiceImpl implements FilmService {
     public FilmResponse delLike(Long idUser, Long idFilm) {
         log.info("Обработка Del-запроса...");
         if (userStorage.findById(idUser) != null && filmStorage.findById(idFilm) != null) {
-            Map<Long, Set<Long>> likedUsers = jdbcTemplate.query(selectLikedUsersQuery, new FilmDbStorage.LikedUsersExtractor());
+            Map<Long, Set<Long>> likedUsers = filmStorage.selectLikedUsers();
             if (likedUsers.get(idFilm) != null && !likedUsers.get(idFilm).contains(idUser)) {
                 log.error("Пользователь с ID {} не ставил лайк фильму с ID {}", idUser, idFilm);
                 throw new ConditionsNotMetException("Пользователь с ID " + idUser + " не ставил лайк фильму с ID " + idFilm);

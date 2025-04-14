@@ -6,6 +6,8 @@ import ru.yandex.practicum.filmorate.model.FilmDto;
 import ru.yandex.practicum.filmorate.model.FilmResponse;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public interface FilmStorage {
 
@@ -16,4 +18,7 @@ public interface FilmStorage {
     FilmResponse create(@Valid FilmDto buffer);
 
     FilmResponse update(FilmDto newFilm);
+
+    Map<Long, Set<Long>> selectLikedUsers();
+
 }

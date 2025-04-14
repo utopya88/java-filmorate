@@ -32,6 +32,13 @@ public class FilmDbStorage implements FilmStorage {
     private static final String SQL_UPDATE_FILM_RATING = "update film set ratingId = ? where id = ?";
     private static final String SQL_UPDATE_FILM = "update film set name = ?, description = ?, releaseDate = ?, duration = ?, ratingId = ? where id = ?";
 
+    private final String selectLikedUsersQuery = "SELECT filmId, userId FROM likedUsers";
+    private final String insertLikeQuery = "INSERT INTO likedUsers(filmId, userId) VALUES (?, ?)";
+    private final String selectFilmGenresQuery = "SELECT filmId, genreId FROM filmGenre WHERE filmId = ?";
+    private final String deleteLikeQuery = "DELETE FROM likedUsers WHERE filmId = ? AND userId = ?";
+    private final String selectTopFilmsQuery = "SELECT f.id as name, COUNT(l.userId) as coun FROM likedUsers as l LEFT OUTER JOIN film AS f ON l.filmId = f.id GROUP BY f.name ORDER BY COUNT(l.userId) DESC LIMIT 10";
+
+
     //сообщения для логирования и исключений
     private static final String LOG_GET_REQUEST = "Обработка Get-запроса...";
     private static final String LOG_CREATE_REQUEST = "Обработка Create-запроса...";
@@ -279,5 +286,10 @@ public class FilmDbStorage implements FilmStorage {
     private void logAndThrowNotFoundException(String value, String message) {
         log.error("Exception", new NotFoundException(message));
         throw new NotFoundException(message);
+    }
+
+    @Override
+    public Map<Long, Set<Long>> selectLikedUsers() {
+        return jdbcTemplate.query(selectLikedUsersQuery, new FilmDbStorage.LikedUsersExtractor());
     }
 }
