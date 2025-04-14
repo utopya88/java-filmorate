@@ -16,7 +16,7 @@ import java.util.*;
 @Data
 @Builder
 @AllArgsConstructor(staticName = "of")
-public class Buffer {
+public class FilmDto {
     private Long id;
     @NotNull
     @NotBlank
@@ -44,7 +44,7 @@ public class Buffer {
         return values;
     }
 
-    private Buffer parseObjectNodeToBuffer(ObjectNode objectNode) {
+    public static FilmDto parseObjectNodeToBuffer(ObjectNode objectNode) {
         Long id = objectNode.has("id") ? objectNode.get("id").asLong() : 0L;
         String name = objectNode.get("name").asText();
         String description = objectNode.get("description").asText();
@@ -53,7 +53,7 @@ public class Buffer {
         List<String> mpa = objectNode.get("mpa").findValuesAsText("id");
         List<String> genres = extractGenresFromObjectNode(objectNode);
 
-        return Buffer.of(
+        return FilmDto.of(
                 id,
                 name,
                 description,
@@ -64,7 +64,7 @@ public class Buffer {
         );
     }
 
-    private List<String> extractGenresFromObjectNode(ObjectNode objectNode) {
+    public static List<String> extractGenresFromObjectNode(ObjectNode objectNode) {
         try {
             return objectNode.get("genres").findValuesAsText("id");
         } catch (NullPointerException e) {

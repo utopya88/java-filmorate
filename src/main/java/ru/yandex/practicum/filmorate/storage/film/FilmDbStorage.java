@@ -183,7 +183,7 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
-    public FilmResponse create(@Valid Buffer buffer) {
+    public FilmResponse create(@Valid FilmDto buffer) {
         log.info(LOG_CREATE_REQUEST);
         validateBuffer(buffer);
 
@@ -200,7 +200,7 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
-    public FilmResponse update(@Valid Buffer newFilm) {
+    public FilmResponse update(@Valid FilmDto newFilm) {
         log.info(LOG_UPDATE_REQUEST);
         if (newFilm.getId() == null) {
             logAndThrowConditionsNotMetException("Id должен быть указан");
@@ -227,7 +227,7 @@ public class FilmDbStorage implements FilmStorage {
                 oldFilm.getDuration(), new HashSet<>(), Mpa.of(newFilm.getMpa(), rating.get(newFilm.getMpa())), genres);
     }
 
-    private void validateBuffer(Buffer buffer) {
+    private void validateBuffer(FilmDto buffer) {
         if (buffer.getName() == null || buffer.getName().isBlank()) {
             logAndThrowConditionsNotMetException(ERROR_EMPTY_NAME);
         }
