@@ -2,7 +2,6 @@ package ru.yandex.practicum.filmorate.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.ConditionsNotMetException;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
@@ -19,7 +18,6 @@ public class FilmServiceImpl implements FilmService {
 
     private final UserStorage userStorage;
     private final FilmStorage filmStorage;
-    private final JdbcTemplate jdbcTemplate;
 
     @Override
     public FilmResponse addLike(Long idUser, Long idFilm) {
