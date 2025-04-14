@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.Buffer;
-import ru.yandex.practicum.filmorate.model.dto.Film.FilmDto;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.FilmResponse;
 import ru.yandex.practicum.filmorate.service.FilmInterface;
@@ -47,9 +46,9 @@ public class FilmController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public FilmResponse create(@RequestBody FilmDto filmDto) {
-        //Buffer buffer = parseObjectNodeToBuffer(objectNode);
-        return filmStorage.create(filmDto);
+    public FilmResponse create(@Valid @RequestBody ObjectNode objectNode) {
+        Buffer buffer = parseObjectNodeToBuffer(objectNode);
+        return filmStorage.create(buffer);
     }
 
     @PutMapping

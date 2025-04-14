@@ -11,7 +11,6 @@ import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.exception.ConditionsNotMetException;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.*;
-import ru.yandex.practicum.filmorate.model.dto.Film.FilmDto;
 import ru.yandex.practicum.filmorate.service.GenreExtractor;
 import ru.yandex.practicum.filmorate.service.RatingNameExtractor;
 
@@ -184,7 +183,7 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
-    public FilmResponse create(@Valid FilmDto buffer) {
+    public FilmResponse create(@Valid Buffer buffer) {
         log.info(LOG_CREATE_REQUEST);
         validateBuffer(buffer);
 
