@@ -51,9 +51,9 @@ public class FilmController {
     }
 
     @PutMapping
-    public FilmResponse update(@Valid @RequestBody ObjectNode objectNode) {
-        FilmDTO filmDTO = parseObjectNodeToBuffer(objectNode);
-        return filmStorage.update(filmDTO);
+    public FilmResponse update(@Valid @RequestBody FilmDTO filmDto) {
+        //FilmDTO filmDTO = parseObjectNodeToBuffer(objectNode);
+        return filmStorage.update(filmDto);
     }
 
     @PutMapping("/{id}/like/{userId}")
@@ -69,26 +69,6 @@ public class FilmController {
     @GetMapping("/popular")
     public LinkedHashSet<FilmResponse> viewRating(@RequestParam(defaultValue = "10") Long count) {
         return filmInterface.viewRating(count);
-    }
-
-    private FilmDTO parseObjectNodeToBuffer(ObjectNode objectNode) {
-        Long id = objectNode.has("id") ? objectNode.get("id").asLong() : 0L;
-        String name = objectNode.get("name").asText();
-        String description = objectNode.get("description").asText();
-        String releaseDate = objectNode.get("releaseDate").asText();
-        Integer duration = objectNode.get("duration").asInt();
-        List<String> mpa = objectNode.get("mpa").findValuesAsText("id");
-        List<String> genres = extractGenresFromObjectNode(objectNode);
-
-        return FilmDTO.of(
-                id,
-                name,
-                description,
-                LocalDate.parse(releaseDate, DATE_FORMATTER),
-                duration,
-                genres,
-                Long.valueOf(mpa.get(0))
-        );
     }
 
     private List<String> extractGenresFromObjectNode(ObjectNode objectNode) {
