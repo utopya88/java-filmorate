@@ -5,8 +5,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.service.UserInterface;
-import ru.yandex.practicum.filmorate.service.UserService;
+//import ru.yandex.practicum.filmorate.service.UserService;
+import ru.yandex.practicum.filmorate.service.UserServiceImpl;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.util.Collection;
@@ -23,7 +23,7 @@ public class UserController {
     private static final String COMMON_FRIENDS_PATH = USER_ID_PATH + "/friends/common/{otherId}";
 
     private final UserStorage userStorage;
-    private final UserService userService;
+    private final UserServiceImpl userServiceImpl;
 
     @GetMapping
     public Collection<User> findAll() {
@@ -48,21 +48,21 @@ public class UserController {
 
     @PutMapping(FRIEND_ID_PATH)
     public User addFriend(@Valid @PathVariable("id") Long id, @PathVariable("friendId") Long friendId) {
-        return userService.addFriend(id, friendId);
+        return userServiceImpl.addFriend(id, friendId);
     }
 
     @DeleteMapping(FRIEND_ID_PATH)
     public User delFriend(@Valid @PathVariable("id") Long id, @PathVariable("friendId") Long friendId) {
-        return userService.delFriend(id, friendId);
+        return userServiceImpl.delFriend(id, friendId);
     }
 
     @GetMapping(COMMON_FRIENDS_PATH)
     public Set<User> findJointFriends(@Valid @PathVariable("id") Long id, @PathVariable("otherId") Long otherId) {
-        return userService.findJointFriends(id, otherId);
+        return userServiceImpl.findJointFriends(id, otherId);
     }
 
     @GetMapping(FRIENDS_PATH)
     public Set<User> findAllFriends(@Valid @PathVariable("id") Long id) {
-        return userService.findAllFriends(id);
+        return userServiceImpl.findAllFriends(id);
     }
 }
