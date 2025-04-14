@@ -5,7 +5,7 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.model.Buffer;
+import ru.yandex.practicum.filmorate.model.FilmDTO;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.FilmResponse;
 import ru.yandex.practicum.filmorate.service.FilmInterface;
@@ -46,15 +46,14 @@ public class FilmController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public FilmResponse create(@Valid @RequestBody ObjectNode objectNode) {
-        Buffer buffer = parseObjectNodeToBuffer(objectNode);
-        return filmStorage.create(buffer);
+    public FilmResponse create(@Valid @RequestBody FilmDTO filmDto) {
+        return filmStorage.create(filmDto);
     }
 
     @PutMapping
     public FilmResponse update(@Valid @RequestBody ObjectNode objectNode) {
-        Buffer buffer = parseObjectNodeToBuffer(objectNode);
-        return filmStorage.update(buffer);
+        FilmDTO filmDTO = parseObjectNodeToBuffer(objectNode);
+        return filmStorage.update(filmDTO);
     }
 
     @PutMapping("/{id}/like/{userId}")
@@ -72,7 +71,7 @@ public class FilmController {
         return filmInterface.viewRating(count);
     }
 
-    private Buffer parseObjectNodeToBuffer(ObjectNode objectNode) {
+    private FilmDTO parseObjectNodeToBuffer(ObjectNode objectNode) {
         Long id = objectNode.has("id") ? objectNode.get("id").asLong() : 0L;
         String name = objectNode.get("name").asText();
         String description = objectNode.get("description").asText();
@@ -81,7 +80,7 @@ public class FilmController {
         List<String> mpa = objectNode.get("mpa").findValuesAsText("id");
         List<String> genres = extractGenresFromObjectNode(objectNode);
 
-        return Buffer.of(
+        return FilmDTO.of(
                 id,
                 name,
                 description,

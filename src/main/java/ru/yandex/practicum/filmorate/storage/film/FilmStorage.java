@@ -1,6 +1,6 @@
 package ru.yandex.practicum.filmorate.storage.film;
 
-import ru.yandex.practicum.filmorate.model.Buffer;
+import ru.yandex.practicum.filmorate.model.FilmDTO;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.FilmResponse;
 
@@ -12,7 +12,7 @@ public interface FilmStorage {
 
     FilmResponse findById(Long id);
 
-    FilmResponse create(Buffer film);
+    FilmResponse create(FilmDTO film);
 
-    FilmResponse update(Buffer newFilm);
+    FilmResponse update(FilmDTO newFilm);
 }

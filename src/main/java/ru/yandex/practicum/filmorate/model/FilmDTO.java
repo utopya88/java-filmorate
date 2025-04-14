@@ -14,7 +14,7 @@ import java.util.*;
 @Data
 @Builder
 @AllArgsConstructor(staticName = "of")
-public class Buffer {
+public class FilmDTO {
     private Long id;
     @NotNull
     @NotBlank

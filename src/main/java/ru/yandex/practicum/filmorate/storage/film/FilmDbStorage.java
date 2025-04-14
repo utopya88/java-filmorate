@@ -183,24 +183,24 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
-    public FilmResponse create(@Valid Buffer buffer) {
+    public FilmResponse create(@Valid FilmDTO filmDTO) {
         log.info(LOG_CREATE_REQUEST);
-        validateBuffer(buffer);
+        validateBuffer(filmDTO);
 
         SimpleJdbcInsert simpleJdbcInsert = new SimpleJdbcInsert(jdbcTemplate).withTableName("film").usingGeneratedKeyColumns("id");
-        Long filmId = simpleJdbcInsert.executeAndReturnKey(buffer.toMapBuffer()).longValue();
+        Long filmId = simpleJdbcInsert.executeAndReturnKey(filmDTO.toMapBuffer()).longValue();
 
         Map<Long, String> genre = jdbcTemplate.query(SQL_SELECT_GENRES, new GenreExtractor());
         Map<Long, String> rating = jdbcTemplate.query(SQL_SELECT_RATINGS, new RatingNameExtractor());
 
-        LinkedHashSet<Genre> genres = processGenres(buffer.getGenres(), filmId, genre);
-        updateFilmRating(buffer.getMpa(), filmId);
+        LinkedHashSet<Genre> genres = processGenres(filmDTO.getGenres(), filmId, genre);
+        updateFilmRating(filmDTO.getMpa(), filmId);
 
-        return FilmResponse.of(filmId, buffer.getName(), buffer.getDescription(), buffer.getReleaseDate(), buffer.getDuration(), new HashSet<>(), Mpa.of(buffer.getMpa(), rating.get(buffer.getMpa())), genres);
+        return FilmResponse.of(filmId, filmDTO.getName(), filmDTO.getDescription(), filmDTO.getReleaseDate(), filmDTO.getDuration(), new HashSet<>(), Mpa.of(filmDTO.getMpa(), rating.get(filmDTO.getMpa())), genres);
     }
 
     @Override
-    public FilmResponse update(@Valid Buffer newFilm) {
+    public FilmResponse update(@Valid FilmDTO newFilm) {
         log.info(LOG_UPDATE_REQUEST);
         if (newFilm.getId() == null) {
             logAndThrowConditionsNotMetException("Id должен быть указан");
@@ -227,25 +227,25 @@ public class FilmDbStorage implements FilmStorage {
                 oldFilm.getDuration(), new HashSet<>(), Mpa.of(newFilm.getMpa(), rating.get(newFilm.getMpa())), genres);
     }
 
-    private void validateBuffer(Buffer buffer) {
-        if (buffer.getName() == null || buffer.getName().isBlank()) {
+    private void validateBuffer(FilmDTO filmDTO) {
+        if (filmDTO.getName() == null || filmDTO.getName().isBlank()) {
             logAndThrowConditionsNotMetException(ERROR_EMPTY_NAME);
         }
 
-        if (buffer.getDescription().length() > 200) {
+        if (filmDTO.getDescription().length() > 200) {
             logAndThrowConditionsNotMetException(ERROR_DESCRIPTION_LENGTH);
         }
 
-        if (buffer.getReleaseDate().isBefore(LocalDate.of(1895, 12, 28))) {
+        if (filmDTO.getReleaseDate().isBefore(LocalDate.of(1895, 12, 28))) {
             logAndThrowConditionsNotMetException(ERROR_RELEASE_DATE);
         }
 
-        if (buffer.getDuration() == null || buffer.getDuration() <= 0) {
+        if (filmDTO.getDuration() == null || filmDTO.getDuration() <= 0) {
             logAndThrowConditionsNotMetException(ERROR_DURATION);
         }
 
-        if (!(buffer.getMpa() > 0 && buffer.getMpa() < 6)) {
-            logAndThrowNotFoundException(buffer.getMpa().toString(), ERROR_INVALID_RATING);
+        if (!(filmDTO.getMpa() > 0 && filmDTO.getMpa() < 6)) {
+            logAndThrowNotFoundException(filmDTO.getMpa().toString(), ERROR_INVALID_RATING);
         }
     }
 

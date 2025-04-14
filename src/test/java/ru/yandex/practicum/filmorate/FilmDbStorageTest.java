@@ -7,7 +7,7 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.jdbc.core.JdbcTemplate;
 import ru.yandex.practicum.filmorate.exception.ConditionsNotMetException;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
-import ru.yandex.practicum.filmorate.model.Buffer;
+import ru.yandex.practicum.filmorate.model.FilmDTO;
 import ru.yandex.practicum.filmorate.storage.film.FilmDbStorage;
 
 import java.time.LocalDate;
@@ -30,7 +30,7 @@ class FilmDbStorageTest {
 
     @Test
     void createFilmWithEmptyNameShouldThrowException() {
-        Buffer buffer = Buffer.of(
+        FilmDTO filmDTO = FilmDTO.of(
                 null, // id
                 "", // Пустое название
                 "Valid description",
@@ -40,12 +40,12 @@ class FilmDbStorageTest {
                 1L
         );
 
-        assertThrows(ConditionsNotMetException.class, () -> filmDbStorage.create(buffer));
+        assertThrows(ConditionsNotMetException.class, () -> filmDbStorage.create(filmDTO));
     }
 
     @Test
     void createFilmWithLongDescriptionShouldThrowException() {
-        Buffer buffer = Buffer.of(
+        FilmDTO filmDTO = FilmDTO.of(
                 null, // id
                 "Valid Name",
                 "A".repeat(201), // Описание длиннее 200 символов
@@ -56,12 +56,12 @@ class FilmDbStorageTest {
         );
 
 
-        assertThrows(ConditionsNotMetException.class, () -> filmDbStorage.create(buffer));
+        assertThrows(ConditionsNotMetException.class, () -> filmDbStorage.create(filmDTO));
     }
 
     @Test
     void createFilmWithInvalidReleaseDateShouldThrowException() {
-        Buffer buffer = Buffer.of(
+        FilmDTO filmDTO = FilmDTO.of(
                 null, // id
                 "Valid Name",
                 "Valid description",
@@ -70,12 +70,12 @@ class FilmDbStorageTest {
                 Collections.singletonList("1"),
                 1L
         );
-        assertThrows(ConditionsNotMetException.class, () -> filmDbStorage.create(buffer));
+        assertThrows(ConditionsNotMetException.class, () -> filmDbStorage.create(filmDTO));
     }
 
     @Test
     void createFilmWithNegativeDurationShouldThrowException() {
-        Buffer buffer = Buffer.of(
+        FilmDTO filmDTO = FilmDTO.of(
                 null, // id
                 "Valid Name",
                 "Valid description",
@@ -85,12 +85,12 @@ class FilmDbStorageTest {
                 1L
         );
 
-        assertThrows(ConditionsNotMetException.class, () -> filmDbStorage.create(buffer));
+        assertThrows(ConditionsNotMetException.class, () -> filmDbStorage.create(filmDTO));
     }
 
     @Test
     void createFilmWithInvalidMpaShouldThrowException() {
-        Buffer buffer = Buffer.of(
+        FilmDTO filmDTO = FilmDTO.of(
                 null, // id
                 "Valid Name",
                 "Valid description",
@@ -100,6 +100,6 @@ class FilmDbStorageTest {
                 0L // Некорректный рейтинг MPA
         );
 
-        assertThrows(NotFoundException.class, () -> filmDbStorage.create(buffer));
+        assertThrows(NotFoundException.class, () -> filmDbStorage.create(filmDTO));
     }
 }
