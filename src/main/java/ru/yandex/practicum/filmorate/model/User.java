@@ -1,21 +1,42 @@
 package ru.yandex.practicum.filmorate.model;
 
-import lombok.Data;
-import lombok.NonNull;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import lombok.*;
 
 import java.time.LocalDate;
-import java.util.HashSet;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 @Data
+@Builder
+@EqualsAndHashCode(of = {"email"})
+@AllArgsConstructor(staticName = "of")
 public class User {
-    private Integer id;
-    @NonNull
-    private String email;
-    @NonNull
-    private String login;
+    private Long id;
     private String name;
-    @NonNull
-    LocalDate birthday;
-    private Set<Integer> friends = new HashSet<>();
+    @Email
+    private String email;
+    @NotNull
+    @NotBlank
+    private String login;
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    private LocalDate birthday;
+    private Set<Long> friends;
+    @JsonIgnore
+    private Set<Long> friendRequests;
+
+    public Map<String, Object> toMapUser() {
+        Map<String, Object> values = new HashMap<>();
+        values.put("id", id);
+        values.put("name", name);
+        values.put("email", email);
+        values.put("login", login);
+        values.put("birthday", birthday);
+        return values;
+    }
 }
