@@ -8,7 +8,8 @@ import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.FilmDto;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.FilmResponse;
-import ru.yandex.practicum.filmorate.service.FilmInterface;
+import ru.yandex.practicum.filmorate.service.FilmService;
+import ru.yandex.practicum.filmorate.service.FilmService;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 
 //import java.time.LocalDate;
@@ -23,15 +24,15 @@ public class FilmController {
     private static final String DEFAULT_GENRE = "нет жанра";
 
     private final FilmStorage filmStorage;
-    private final FilmInterface filmInterface;
+    private final FilmService filmService;
 
     @Autowired
     public FilmController(
             FilmStorage filmStorage,
-            FilmInterface filmInterface
+            FilmService filmService
     ) {
         this.filmStorage = filmStorage;
-        this.filmInterface = filmInterface;
+        this.filmService = filmService;
     }
 
     @GetMapping
@@ -57,17 +58,17 @@ public class FilmController {
 
     @PutMapping("/{id}/like/{userId}")
     public FilmResponse addLike(@Valid @PathVariable("id") Long id, @PathVariable("userId") Long userId) {
-        return filmInterface.addLike(userId, id);
+        return filmService.addLike(userId, id);
     }
 
     @DeleteMapping("/{id}/like/{userId}")
     public FilmResponse delLike(@Valid @PathVariable("id") Long id, @PathVariable("userId") Long userId) {
-        return filmInterface.delLike(userId, id);
+        return filmService.delLike(userId, id);
     }
 
     @GetMapping("/popular")
     public LinkedHashSet<FilmResponse> viewRating(@RequestParam(defaultValue = "10") Long count) {
-        return filmInterface.viewRating(count);
+        return filmService.viewRating(count);
     }
 
 }
