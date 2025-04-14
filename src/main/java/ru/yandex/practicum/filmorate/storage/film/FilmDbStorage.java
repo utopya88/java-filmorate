@@ -13,6 +13,7 @@ import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.*;
 import ru.yandex.practicum.filmorate.service.GenreExtractor;
 import ru.yandex.practicum.filmorate.service.RatingNameExtractor;
+import ru.yandex.practicum.filmorate.service.TopLikedUsersExtractor;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -291,5 +292,25 @@ public class FilmDbStorage implements FilmStorage {
     @Override
     public Map<Long, Set<Long>> selectLikedUsers() {
         return jdbcTemplate.query(selectLikedUsersQuery, new FilmDbStorage.LikedUsersExtractor());
+    }
+
+    @Override
+    public void insertLike(Long idUser, Long idFilm) {
+        jdbcTemplate.update(insertLikeQuery, idFilm, idUser);
+    }
+
+    @Override
+    public Map<Long, LinkedHashSet<Long>> selectFilmGenre(Long filmId) {
+        return jdbcTemplate.query(selectFilmGenresQuery, new FilmDbStorage.FilmGenreExtractor(), filmId);
+    }
+
+    @Override
+    public void deleteLike(Long idUser, Long idFilm) {
+        jdbcTemplate.update(deleteLikeQuery, idFilm, idUser);
+    }
+
+    @Override
+    public LinkedHashMap<Long, Long> selectTopFilms() {
+        return jdbcTemplate.query(selectTopFilmsQuery, new TopLikedUsersExtractor());
     }
 }
