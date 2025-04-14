@@ -19,11 +19,6 @@ import java.util.Set;
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
-    //sQL-запросы
-    private static final String SQL_SELECT_FRIENDS = "select userId, friendId from friends";
-    private static final String SQL_INSERT_FRIEND = "insert into friends(userId, friendId) values (?, ?)";
-    private static final String SQL_DELETE_FRIEND = "delete from friends where userId = ? and friendId = ?";
-
     //сообщения для логирования и исключений
     private static final String LOG_POST_REQUEST = "Обработка Post-запроса...";
     private static final String LOG_DELETE_REQUEST = "Обработка Del-запроса...";
@@ -45,7 +40,7 @@ public class UserServiceImpl implements UserService {
             logAndThrowConditionsNotMetException(String.format(ERROR_FRIEND_ALREADY_ADDED, idFriend));
         }
 
-        jdbcTemplate.update(SQL_INSERT_FRIEND, idUser, idFriend);
+        userStorage.addFriendSql(idUser, idFriend);
         return userStorage.findById(idUser);
     }
 
@@ -56,7 +51,7 @@ public class UserServiceImpl implements UserService {
         validateUserExists(idUser);
         validateUserExists(idFriend);
 
-        jdbcTemplate.update(SQL_DELETE_FRIEND, idUser, idFriend);
+        userStorage.delFriends(idUser, idFriend);
         return userStorage.findById(idUser);
     }
 
@@ -88,12 +83,8 @@ public class UserServiceImpl implements UserService {
 
         validateUserExists(idUser);
 
-        Map<Long, Set<Long>> friends = jdbcTemplate.query(SQL_SELECT_FRIENDS, new FriendsExtractor());
-        assert friends != null;
-        Set<Long> userFriends = friends.getOrDefault(idUser, new HashSet<>());
-
         Set<User> result = new HashSet<>();
-        for (Long friendId : userFriends) {
+        for (Long friendId : userStorage.selectFriends(idUser)) {
             result.add(userStorage.findById(friendId));
         }
         return result;
@@ -106,9 +97,8 @@ public class UserServiceImpl implements UserService {
     }
 
     private boolean isFriend(Long idUser, Long idFriend) {
-        Map<Long, Set<Long>> friends = jdbcTemplate.query(SQL_SELECT_FRIENDS, new FriendsExtractor());
-        assert friends != null;
-        return friends.getOrDefault(idUser, new HashSet<>()).contains(idFriend);
+        assert userStorage.sqlFriends() != null;
+        return userStorage.sqlFriends().getOrDefault(idUser, new HashSet<>()).contains(idFriend);
     }
 
     private void logAndThrowConditionsNotMetException(String message) {

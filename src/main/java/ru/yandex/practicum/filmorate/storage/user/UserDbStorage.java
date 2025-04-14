@@ -33,6 +33,9 @@ public class UserDbStorage implements UserStorage {
     private final String selectUserById = "SELECT id, name, email, login, birthday FROM users WHERE id = ?";
     private final String selectAllEmails = "SELECT email FROM users";
     private final String updateUser = "UPDATE users SET name = ?, email = ?, login = ?, birthday = ? WHERE id = ?";
+    private static final String SQL_SELECT_FRIENDS = "select userId, friendId from friends";
+    private static final String SQL_INSERT_FRIEND = "insert into friends(userId, friendId) values (?, ?)";
+    private static final String SQL_DELETE_FRIEND = "delete from friends where userId = ? and friendId = ?";
 
     private User mapRowToUser(ResultSet resultSet, int rowNum) throws SQLException {
         return User.builder()
@@ -163,5 +166,27 @@ public class UserDbStorage implements UserStorage {
                 newUser.getId());
 
         return newUser;
+    }
+
+    @Override
+    public void addFriendSql(Long idUser, Long idFriend) {
+        jdbcTemplate.update(SQL_INSERT_FRIEND, idUser, idFriend);
+    }
+
+    @Override
+    public Set<Long> selectFriends(Long idUser) {
+        Map<Long, Set<Long>> friends = jdbcTemplate.query(SQL_SELECT_FRIENDS, new FriendsExtractor());
+        assert friends != null;
+        return friends.getOrDefault(idUser, new HashSet<>());
+    }
+
+    @Override
+    public Map<Long, Set<Long>> sqlFriends() {
+        return jdbcTemplate.query(SQL_SELECT_FRIENDS, new FriendsExtractor());
+    }
+
+    @Override
+    public void delFriends(Long idUser, Long idFriend) {
+        jdbcTemplate.update(SQL_DELETE_FRIEND, idUser, idFriend);
     }
 }
