@@ -1,20 +1,26 @@
 package ru.yandex.practicum.filmorate.storage.user;
 
-import org.springframework.web.bind.annotation.RequestBody;
 import ru.yandex.practicum.filmorate.model.User;
 
-import java.util.ArrayList;
-import java.util.Optional;
+import java.util.Collection;
+import java.util.Map;
+import java.util.Set;
 
 public interface UserStorage {
 
-    ArrayList<User> findAll();
+    Collection<User> findAll();
 
-    Optional<User> create(@RequestBody User user);
+    User findById(Long id);
 
-    Optional<User> update(@RequestBody User newUser);
+    User create(User user);
 
-    Optional<User> getUserById(Integer id);
+    User update(User newUser);
 
-    boolean isFindUserById(Integer id);
+    void addFriendSql(Long idUser, Long idFriend);
+
+    Set<Long> selectFriends(Long idUser);
+
+    Map<Long, Set<Long>> sqlFriends();
+
+    void delFriends(Long idUser, Long idFriend);
 }

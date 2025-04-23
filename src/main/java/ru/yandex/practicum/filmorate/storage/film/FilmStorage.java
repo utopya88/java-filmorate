@@ -1,21 +1,30 @@
 package ru.yandex.practicum.filmorate.storage.film;
 
-import org.springframework.web.bind.annotation.RequestBody;
+import jakarta.validation.Valid;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.FilmDto;
+import ru.yandex.practicum.filmorate.model.FilmResponse;
 
-import java.util.ArrayList;
-import java.util.Optional;
+import java.util.*;
 
 public interface FilmStorage {
 
-    ArrayList<Film> findAll();
+    List<Film> findAll();
 
-    Optional<Film> create(@RequestBody Film film);
+    FilmResponse findById(Long id);
 
-    Optional<Film> update(@RequestBody Film newFilm);
+    FilmResponse create(@Valid FilmDto buffer);
 
-    Film findFilmById(Integer id);
+    FilmResponse update(FilmDto newFilm);
 
-    boolean isFindFilmById(Integer id);
+    Map<Long, Set<Long>> selectLikedUsers();
+
+    void insertLike(Long idUser, Long idFilm);
+
+    Map<Long, LinkedHashSet<Long>> selectFilmGenre(Long filmId);
+
+    void deleteLike(Long idUser, Long idFilm);
+
+    LinkedHashMap<Long, Long> selectTopFilms();
 
 }

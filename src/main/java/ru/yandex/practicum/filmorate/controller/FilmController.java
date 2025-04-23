@@ -1,53 +1,74 @@
 package ru.yandex.practicum.filmorate.controller;
 
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-
+import ru.yandex.practicum.filmorate.model.FilmDto;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.FilmResponse;
 import ru.yandex.practicum.filmorate.service.FilmService;
-import java.util.List;
+import ru.yandex.practicum.filmorate.service.FilmService;
+import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
+
+//import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
 
 @RestController
 @RequestMapping("/films")
 public class FilmController {
 
+    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+    private static final String DEFAULT_GENRE = "нет жанра";
+
+    private final FilmStorage filmStorage;
     private final FilmService filmService;
 
-    public FilmController(FilmService filmService) {
+    @Autowired
+    public FilmController(
+            FilmStorage filmStorage,
+            FilmService filmService
+    ) {
+        this.filmStorage = filmStorage;
         this.filmService = filmService;
     }
 
-    @ResponseStatus(HttpStatus.OK)
     @GetMapping
     public List<Film> findAll() {
-        return filmService.findAllFilms();
+        return filmStorage.findAll();
     }
 
-    @ResponseStatus(HttpStatus.CREATED)
+    @GetMapping("/{id}")
+    public FilmResponse findById(@PathVariable("id") Long id) {
+        return filmStorage.findById(id);
+    }
+
     @PostMapping
-    public Film create(@RequestBody Film film) {
-       return filmService.create(film);
+    @ResponseStatus(HttpStatus.CREATED)
+    public FilmResponse create(@Valid @RequestBody ObjectNode objectNode) {
+        return filmStorage.create(FilmDto.parseObjectNodeToBuffer(objectNode));
     }
 
-    @ResponseStatus(HttpStatus.OK)
     @PutMapping
-    public Film update(@RequestBody Film newFilm) {
-        return filmService.update(newFilm);
+    public FilmResponse update(@Valid @RequestBody ObjectNode objectNode) {
+        return filmStorage.update(FilmDto.parseObjectNodeToBuffer(objectNode));
     }
 
     @PutMapping("/{id}/like/{userId}")
-    public Integer addLike(@PathVariable Integer id, @PathVariable Integer userId) {
-        return filmService.addLike(id, userId);
+    public FilmResponse addLike(@Valid @PathVariable("id") Long id, @PathVariable("userId") Long userId) {
+        return filmService.addLike(userId, id);
     }
 
-    @DeleteMapping ("/{id}/like/{userId}")
-    public Integer deleteLike(@PathVariable Integer id, @PathVariable Integer userId) {
-        return filmService.deleteLike(id, userId);
+    @DeleteMapping("/{id}/like/{userId}")
+    public FilmResponse delLike(@Valid @PathVariable("id") Long id, @PathVariable("userId") Long userId) {
+        return filmService.delLike(userId, id);
     }
 
-    @ResponseStatus(HttpStatus.OK)
     @GetMapping("/popular")
-    public List<Film> returnFilms(@RequestParam(defaultValue = "10") Integer count) {
-        return filmService.getFilmsForLikes(count);
+    public LinkedHashSet<FilmResponse> viewRating(@RequestParam(defaultValue = "10") Long count) {
+        return filmService.viewRating(count);
     }
+
 }
